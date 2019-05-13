@@ -26,8 +26,8 @@ function fileNotFound(req, res) {
 // put together the server pipeline
 const app = express()
 app.use(express.static('public'));  // can I find a static file? 
-// app.get('/query', queryHandler );   // if not, is it a valid query?
-app.get('/translate', queryHandler );   // if not, is it a valid query?
+app.get('/query', queryHandler );   // if not, is it a valid query?
+// app.get('/translate', queryHandler );   // if not, is it a valid query?
 app.use( fileNotFound );            // otherwise not found
 
 app.listen(port, function (){console.log('Listening...');} )
