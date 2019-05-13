@@ -1,0 +1,29 @@
+{
+  "name": "mangoforum",
+  "version": "1.0.0",
+  "description": "Forum for ECS 153 Project",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql": "^2.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patricka3125/ECS153FinalProject.git"
+  },
+  "keywords": [
+    "forum",
+    "node",
+    "ecs153"
+  ],
+  "author": "Jonathan Hsu, Patrick Liao, Zaprin Ignatiev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patricka3125/ECS153FinalProject/issues"
+  },
+  "homepage": "https://github.com/patricka3125/ECS153FinalProject#readme"
+}
