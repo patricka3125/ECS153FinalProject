@@ -1,5 +1,5 @@
 const express = require('express')
-const port = 57769
+const port = 8000
 
 function queryHandler(req, res, next) {
     let url = req.url;
