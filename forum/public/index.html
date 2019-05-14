@@ -23,8 +23,8 @@
 		</span>
 	</nav>
 
-	<main>
-		<span class="pagetitle">Mango Forum</span>
+	<main id="main">
+		<span class="pagetitle">Mango Forum</span> <span style="float:right;cursor:pointer;" onclick="clearposts();">Clear Posts</span>
 		<div class="form">
 			<div class="bar">Create Post</div>
 			<!-- <label for="new_title">New Post Title</label> -->
@@ -35,13 +35,13 @@
 
 			<input type="submit" value="Create Post" onclick="sendnewpost();">
 		</div>
-		<!-- <div id="inputDiv">
-			<input id="word"> <p onclick="getresponse();">submit</p>
-			<input id="save"> <p onclick="">save</p>
+
+		<!-- <div class="post">
+			<div class="bar">Author<span class="datetime">5/12/19 3:36pm</span></div>
+			<h3>Example Post Title</h3>
+			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 		</div>
-		<div id="outputDiv">
-			<p id="outputGoesHere"></p>
-		</div> -->
+
 		<div class="post">
 			<div class="bar">John Smith <span class="datetime">5/12/19 3:36pm</span></div>
 			<h3>Example Post Title</h3><br>
@@ -90,7 +90,7 @@
 					<input type="submit" value="Create Reply" onclick="">
 				</div>
 			</div>
-		</div>
+		</div> -->
 			
 	</main>
 

@@ -8,25 +8,18 @@ const fs = require("fs");
 
 const dbFileName = "mango.db";
 
+const SqlString = require("sqlstring");
+
 const db = new sqlite3.Database(dbFileName, (err) => {
     if (err) {
         console.error(err.message);
     } else {
         console.log('Created/connected to the database.');
+        console.log("create database table basicposts");
+        db.run("CREATE TABLE IF NOT EXISTS basicposts(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, date DATETIME, content TEXT)"); //,  insertData);
     }
 });
 
-// const createTable = () => {
-//     console.log("create database table posts");
-//     db.run("CREATE TABLE IF NOT EXISTS contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)",  insertData);
-// }
-
-db.close((err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Closed database.');
-});
 
 // // mysql
 // var mysql = require('mysql');
@@ -61,16 +54,48 @@ function queryHandler(req, res, next) {
     }
 }
 
+// https://www.techiediaries.com/node-sqlite-crud/
+function readsql() {
+    console.log("Read data from basicposts");
+    db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
+        rows.forEach(function (row) {
+            console.log(row.id + ": " + row.title + "; " + row.date + "; " + row.content);
+        });
+    });
+}
+
 function newpostHandler(req, res, next) {
     // let url = req.url;
     // let qObj = req.query;
     // console.log(qObj);
     // console.log(typeof(req));
     // console.log()
-    let title=req.body.title;
-    let content = req.body.content;
+    let title = SqlString.escape(req.body.title);
+    let content = SqlString.escape(req.body.content);
+    let datetime = new Date(); //.toUTCString();
+    datetime = SqlString.escape(datetime);
     console.log(req.body, req.body.title, req.body.content);
+
+    db.run('INSERT INTO basicposts(title, date, content) VALUES (?, ?, ?)', [title, datetime, content]);
+
+    readsql();
+
     res.send("done!");
+}
+
+function getpostsHandler(req, res, next) {
+    
+    db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
+        res.send(rows);
+    });
+
+}
+
+function clearpostsHandler(req, res, next) {
+    
+    db.all("DELETE FROM basicposts");
+    res.send("done!");
+
 }
 
 function fileNotFound(req, res) {
@@ -90,7 +115,9 @@ app.get('/query', queryHandler );   // if not, is it a valid query?
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.get('/getposts', getpostsHandler);
 app.post('/newpost', newpostHandler);
+app.get('/clearposts', clearpostsHandler);
 
 // app.get('/newpost', newpostHandler );   // if not, is it a valid query?
 // app.get('/translate', queryHandler );   // if not, is it a valid query?
@@ -106,6 +133,12 @@ if (module === require.main) {
     console.log(`App listening on port ${port}`);
   });
   // [END server]
+    // db.close((err) => {
+    //     if (err) {
+    //         return console.error(err.message);
+    //     }
+    //     console.log('Closed database.');
+    // });
 }
 
 module.exports = app;
