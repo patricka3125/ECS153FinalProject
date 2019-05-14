@@ -17,6 +17,7 @@ nav {
 	justify-content: space-between;
 	background-color:#f2f2f2;
 	margin-bottom:50px;
+	border-bottom: 1px solid #cccccc;
 }
 .logo {
 	/*float:left;*/
@@ -113,9 +114,10 @@ h4 {
 	border-radius: 5px;
 	/*background-color: #f2f2f2;*/
 	border-radius: 5px;
-	border: 1px solid #f2f2f2;
+	/*border: 1px solid #f2f2f2;*/
 	padding: var(--margin-align);
 	margin-bottom:50px;
+	border: 1px solid #cccccc;
 }
 
 .post {
@@ -123,6 +125,7 @@ h4 {
 	border-radius: 5px;
  	border: 1px solid #f2f2f2;
 	padding: var(--margin-align);
+	border: 1px solid #cccccc;
 }
 .bar {
 	margin-top: calc(-1 * var(--margin-align));
@@ -132,6 +135,7 @@ h4 {
     padding: 15px var(--margin-align) 15px var(--margin-align);
     background-color: #f2f2f2;
     border-radius: 5px 5px 0 0;
+    border-bottom: 1px solid #cccccc;
 }
 
 .replieshide {
@@ -155,6 +159,7 @@ h4 {
 	border-radius: 5px;
  	border: 1px solid #f2f2f2;
 	padding: var(--margin-align);
+	border: 1px solid #cccccc;
 }
 .reply:last-of-type {
 	margin-bottom:0;
