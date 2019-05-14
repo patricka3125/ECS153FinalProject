@@ -2,29 +2,115 @@
 <html>
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
-<title>Forum</title>
-<link rel="stylesheet" type="text/css" href="reset.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Forum</title>
+	<link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
 
 <body>
 
-<header>
-<h2>Forum</h2>
-</header>
+	<!-- <header>
+		<h2>Forum</h2>
+	</header> -->
+	<nav>
+		<span class="logo">Mango Forum</span>
+		<span class="navlinks">
+			<span class="navlink">About</span>
+			<span class="navlink">Stuff</span>
+			<span class="navlink">Login</span>
+		</span>
+	</nav>
 
-<main>
-<div id="inputDiv">
-  <input id="word"> <p onclick="getresponse();">submit</p>
-  <input id="save"> <p onclick="">save</p>
-</div>
-<div id="outputDiv">
-  <p id="outputGoesHere"></p>
-</div>
-</main>
+	<main>
+		<span class="pagetitle">Mango Forum</span>
+		<div class="form">
+			<div class="bar">Create Post</div>
+			<!-- <label for="new_title">New Post Title</label> -->
+			<input type="text" id="new_title" name="new_title" placeholder="New Post Title">
 
-<script src="script.js"></script>
+			<!-- <label for="new_content">Content</label> -->
+			<textarea id="new_content" name="new_content" placeholder="Write something.." style="height:200px"></textarea>
+
+			<input type="submit" value="Create Post" onclick="">
+		</div>
+		<!-- <div id="inputDiv">
+			<input id="word"> <p onclick="getresponse();">submit</p>
+			<input id="save"> <p onclick="">save</p>
+		</div>
+		<div id="outputDiv">
+			<p id="outputGoesHere"></p>
+		</div> -->
+		<div class="post">
+			<div class="bar">John Smith <span class="datetime">5/12/19 3:36pm</span></div>
+			<h3>Example Post Title</h3><br>
+			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			
+			<div class="replies replieshide" id="post_1_replies">
+				<h4>Replies</h3><span class="toggle" onclick="toggle(1);">Replies</span>
+				<div class="reply">
+					<div class="bar">Author name <span class="datetime">5/13/19 4:26pm</span></div>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</div>
+				<div class="reply">
+					<div class="bar">Author name <span class="datetime">5/13/19 5:60pm</span></div>
+					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</div>
+				<div class="reply">
+					<div class="bar">Create Reply </div>
+					<textarea id="reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
+					<input type="submit" value="Create Reply" onclick="">
+				</div>
+			</div>
+		</div>
+		<div class="post">
+			<div class="bar">Author name <span class="datetime">5/10/19 12:50pm</span></div>
+			<h3>Hello World!</h3><br>
+			Platea dictumst vestibulum rhoncus est pellentesque elit. Leo vel orci porta non pulvinar. Consectetur libero id faucibus nisl tincidunt eget nullam. Sit amet commodo nulla facilisi. Vel pretium lectus quam id leo in vitae. Faucibus scelerisque eleifend donec pretium vulputate sapien nec sagittis aliquam. Consectetur a erat nam at lectus urna. Massa tincidunt dui ut ornare lectus sit amet est placerat. Pharetra vel turpis nunc eget lorem dolor sed viverra ipsum. Faucibus purus in massa tempor nec feugiat. Morbi tristique senectus et netus et. Amet cursus sit amet dictum sit amet justo. Vitae tortor condimentum lacinia quis vel eros donec ac.
+			<br><br>
+			Dis parturient montes nascetur ridiculus mus mauris vitae ultricies. A diam sollicitudin tempor id eu nisl nunc. Posuere sollicitudin aliquam ultrices sagittis orci a scelerisque purus. Eget est lorem ipsum dolor sit amet consectetur adipiscing. Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Sapien nec sagittis aliquam malesuada bibendum arcu. Consequat nisl vel pretium lectus quam id leo in vitae. Sed augue lacus viverra vitae congue eu consequat ac felis. Fermentum leo vel orci porta. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu vitae. Dolor sit amet consectetur adipiscing.
+			<div class="replies replieshide" id="post_2_replies">
+				<h4>Replies</h3><span class="toggle" onclick="toggle(2);">show/hide replies</span>
+				<div class="reply">
+					<div class="bar">Author name <span class="datetime">5/11/19 1:35am</span></div>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</div>
+				<div class="reply">
+					<div class="bar">Author name <span class="datetime">5/12/19 8:53am</span></div>
+					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</div>
+				<div class="reply">
+					<div class="bar">Author name <span class="datetime">5/13/19 12:50pm</span></div>
+					Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Sapien nec sagittis aliquam malesuada bibendum arcu. Consequat nisl vel pretium lectus quam id leo in vitae. Sed augue lacus viverra vitae congue eu consequat ac felis. Fermentum leo vel orci porta. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu vitae. Dolor sit amet consectetur adipiscing.
+				</div>
+				<div class="reply">
+					<div class="bar">Create Reply</div>
+					<textarea id="reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
+					<input type="submit" value="Create Reply" onclick="">
+				</div>
+			</div>
+		</div>
+			
+	</main>
+
+	<script src="script.js"></script>
+	<script>
+		function toggle(postid) {
+			let element = document.getElementById("post_" + postid + "_replies");
+			if (element.classList.contains("replieshide")) {
+				element.classList.add("repliesshow");
+				element.classList.remove("replieshide");
+			}
+			else if (element.classList.contains("repliesshow")) {
+				element.classList.remove("repliesshow");
+				element.classList.add("replieshide");
+			}
+			else {
+				console.log("error1");
+			}
+			
+		}
+	</script>
 </body>
 </html>
 
