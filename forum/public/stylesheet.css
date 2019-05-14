@@ -5,14 +5,14 @@
 }
 @media only screen and  (max-width: 859px) {
 	main {
-		margin-left:30px;
-		margin-right:30px;
+		margin-left:var(--margin-align);
+		margin-right:var(--margin-align);
 	}
 }
 
 nav {
 	width:100%;
-	padding:30px;
+	padding:var(--margin-align);
 	display:flex;
 	justify-content: space-between;
 	background-color:#f2f2f2;
@@ -34,6 +34,7 @@ nav {
 }
 
 body {
+	--margin-align: 25px;
 	margin: 0;
 	padding: 0;
 	font-family: Arial, Helvetica, sans-serif;
@@ -64,7 +65,7 @@ main {
 #new_title {
 	font-size:1.2em;
 	font-weight:bold;
-	margin-bottom:30px;
+	margin-bottom:var(--margin-align);
 }
 input[type=text], input[type=submit], select, textarea {
 	width: 100%;
@@ -74,7 +75,7 @@ input[type=text], input[type=submit], select, textarea {
 	box-sizing: border-box;
 	/*margin-top: 6px;*/
 	/*margin-bottom: 16px;*/
-	margin-bottom:30px;
+	margin-bottom:var(--margin-align);
 	resize: vertical;
 	border:0;
 	font-family: inherit;
@@ -99,12 +100,12 @@ h1, h2, h3, h4, h5 {
 }
 
 h3 {
-	margin-bottom:30px;
+	margin-bottom:var(--margin-align);
 	font-size:1.2em;
 }
 h4 {
-	margin-bottom:30px;
-	margin-top:30px;
+	margin-bottom:var(--margin-align);
+	margin-top:var(--margin-align);
 	font-size:1.2em;
 }
 
@@ -113,7 +114,7 @@ h4 {
 	/*background-color: #f2f2f2;*/
 	border-radius: 5px;
 	border: 1px solid #f2f2f2;
-	padding: 30px;
+	padding: var(--margin-align);
 	margin-bottom:50px;
 }
 
@@ -121,14 +122,14 @@ h4 {
 	margin-bottom:50px;
 	border-radius: 5px;
  	border: 1px solid #f2f2f2;
-	padding: 30px;
+	padding: var(--margin-align);
 }
 .bar {
-	margin-top: -30px;
-    margin-left: -30px;
-    margin-right: -30px;
+	margin-top: calc(-1 * var(--margin-align));
+    margin-left: calc(-1 * var(--margin-align));
+    margin-right: calc(-1 * var(--margin-align));
     margin-bottom: 2em;
-    padding: 15px 30px 15px 30px;
+    padding: 15px var(--margin-align) 15px var(--margin-align);
     background-color: #f2f2f2;
     border-radius: 5px 5px 0 0;
 }
@@ -142,18 +143,18 @@ h4 {
 }
 
 .replies {
-	margin-top:30px;
+	margin-top:var(--margin-align);
 	border-radius: 5px;
  	/*border: 1px solid #f2f2f2;*/
-	/*padding: 30px;*/
+	/*padding: var(--margin-align);*/
 	overflow: hidden;
 	transition: all 0.5s ease;
 }
 .reply {
-	margin-bottom:30px;
+	margin-bottom:var(--margin-align);
 	border-radius: 5px;
  	border: 1px solid #f2f2f2;
-	padding: 30px;
+	padding: var(--margin-align);
 }
 .reply:last-of-type {
 	margin-bottom:0;
