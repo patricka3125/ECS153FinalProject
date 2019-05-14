@@ -5,6 +5,9 @@ function createCORSRequest(method, url) {
 	return xhr;
 }
 
+function createpost() {
+	
+}
 
 // get response using CORS
 function getresponse() {

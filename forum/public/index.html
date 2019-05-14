@@ -18,6 +18,7 @@
 		<span class="navlinks">
 			<span class="navlink">About</span>
 			<span class="navlink">Stuff</span>
+			<span class="navlink">Settings</span>
 			<span class="navlink">Login</span>
 		</span>
 	</nav>
@@ -30,7 +31,7 @@
 			<input type="text" id="new_title" name="new_title" placeholder="New Post Title">
 
 			<!-- <label for="new_content">Content</label> -->
-			<textarea id="new_content" name="new_content" placeholder="Write something.." style="height:200px"></textarea>
+			<textarea id="new_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
 
 			<input type="submit" value="Create Post" onclick="">
 		</div>
@@ -47,7 +48,7 @@
 			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 			
 			<div class="replies replieshide" id="post_1_replies">
-				<h4>Replies</h3><span class="toggle" onclick="toggle(1);">show/hide replies</span>
+				<h4>Replies</h4><span class="toggle" onclick="toggle(1);">Replies<span class="arrow" id="arrow_1"><span></span><span></span></span></span>
 				<div class="reply">
 					<div class="bar">Sam Davis <span class="datetime">5/13/19 4:26pm</span></div>
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -70,7 +71,7 @@
 			<br><br>
 			Dis parturient montes nascetur ridiculus mus mauris vitae ultricies. A diam sollicitudin tempor id eu nisl nunc. Posuere sollicitudin aliquam ultrices sagittis orci a scelerisque purus. Eget est lorem ipsum dolor sit amet consectetur adipiscing. Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Sapien nec sagittis aliquam malesuada bibendum arcu. Consequat nisl vel pretium lectus quam id leo in vitae. Sed augue lacus viverra vitae congue eu consequat ac felis. Fermentum leo vel orci porta. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu vitae. Dolor sit amet consectetur adipiscing.
 			<div class="replies replieshide" id="post_2_replies">
-				<h4>Replies</h3><span class="toggle" onclick="toggle(2);">show/hide replies</span>
+				<h4>Replies</h4><span class="toggle" onclick="toggle(2);">Replies<span class="arrow" id="arrow_2"><span></span><span></span></span></span>
 				<div class="reply">
 					<div class="bar">Megan Hills <span class="datetime">5/11/19 1:35am</span></div>
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -97,13 +98,18 @@
 	<script>
 		function toggle(postid) {
 			let element = document.getElementById("post_" + postid + "_replies");
+			let arrow = document.getElementById("arrow_" + postid);
 			if (element.classList.contains("replieshide")) {
 				element.classList.add("repliesshow");
 				element.classList.remove("replieshide");
+
+				arrow.classList.add("active");
 			}
 			else if (element.classList.contains("repliesshow")) {
 				element.classList.remove("repliesshow");
 				element.classList.add("replieshide");
+				
+				arrow.classList.remove("active");
 			}
 			else {
 				console.log("error1");
