@@ -1,5 +1,15 @@
-const express = require('express')
-const port = 8000
+const express = require('express');
+const bodyParser = require("body-parser");
+const port = 8000;
+
+var mysql      = require('mysql');
+
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'me',
+  password : 'secret',
+  database : 'my_db'
+});
 
 function queryHandler(req, res, next) {
     let url = req.url;
@@ -16,6 +26,18 @@ function queryHandler(req, res, next) {
     }
 }
 
+function newpostHandler(req, res, next) {
+    // let url = req.url;
+    // let qObj = req.query;
+    // console.log(qObj);
+    // console.log(typeof(req));
+    // console.log()
+    let title=req.body.title;
+    let content = req.body.content;
+    console.log(req.body, req.body.title, req.body.content);
+    res.send("done!");
+}
+
 function fileNotFound(req, res) {
     let url = req.url;
     res.type('text/plain');
@@ -25,8 +47,17 @@ function fileNotFound(req, res) {
 
 // put together the server pipeline
 const app = express()
+
 app.use(express.static('public'));  // can I find a static file? 
+
 app.get('/query', queryHandler );   // if not, is it a valid query?
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.post('/newpost', newpostHandler);
+
+// app.get('/newpost', newpostHandler );   // if not, is it a valid query?
 // app.get('/translate', queryHandler );   // if not, is it a valid query?
 app.use( fileNotFound );            // otherwise not found
 

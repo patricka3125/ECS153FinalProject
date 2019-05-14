@@ -71,6 +71,12 @@ main {
 	margin-bottom: calc(var(--margin-align) - 5px);
 	padding-bottom:5px;
 }
+textarea {
+	transition: all 0s ease !important;
+	min-height: 100px;
+	resize: none;
+}
+
 input[type=text], input[type=submit], select, textarea {
 	width: 100%;
 	/*padding: 12px;*/
@@ -80,7 +86,7 @@ input[type=text], input[type=submit], select, textarea {
 	/*margin-top: 6px;*/
 	/*margin-bottom: 16px;*/
 	margin-bottom:var(--margin-align);
-	resize: vertical;
+	/*resize: vertical;*/
 	/*border:0;*/
 	font-family: inherit;
 	font-size:0.85rem;

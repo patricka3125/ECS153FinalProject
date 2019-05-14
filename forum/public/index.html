@@ -28,12 +28,12 @@
 		<div class="form">
 			<div class="bar">Create Post</div>
 			<!-- <label for="new_title">New Post Title</label> -->
-			<input type="text" id="new_title" name="new_title" placeholder="New Post Title">
+			<input type="text" id="new_post_title" name="new_title" placeholder="New Post Title">
 
 			<!-- <label for="new_content">Content</label> -->
-			<textarea id="new_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
+			<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
 
-			<input type="submit" value="Create Post" onclick="">
+			<input type="submit" value="Create Post" onclick="sendnewpost();">
 		</div>
 		<!-- <div id="inputDiv">
 			<input id="word"> <p onclick="getresponse();">submit</p>
@@ -59,7 +59,7 @@
 				</div>
 				<div class="reply">
 					<div class="bar">Create Reply</div>
-					<textarea id="reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
+					<textarea id="new_reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
 					<input type="submit" value="Create Reply" onclick="">
 				</div>
 			</div>
@@ -86,7 +86,7 @@
 				</div>
 				<div class="reply">
 					<div class="bar">Create Reply</div>
-					<textarea id="reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
+					<textarea id="new_reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
 					<input type="submit" value="Create Reply" onclick="">
 				</div>
 			</div>
