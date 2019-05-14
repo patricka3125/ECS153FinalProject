@@ -2,23 +2,49 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const port = 8080;
 
-// mysql
-var mysql = require('mysql');
+// https://www.techiediaries.com/node-sqlite-crud/
+const sqlite3 = require("sqlite3").verbose();  // use sqlite
+const fs = require("fs");
 
-var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'forumadmin',
-    password : 'ecs153password',
-    database : 'mango'
+const dbFileName = "mango.db";
+
+const db = new sqlite3.Database(dbFileName, (err) => {
+    if (err) {
+        console.error(err.message);
+    } else {
+        console.log('Created/connected to the database.');
+    }
 });
 
-connection.connect((err) => {
-    if (err) throw err;
-    console.log('Connected!');
+// const createTable = () => {
+//     console.log("create database table posts");
+//     db.run("CREATE TABLE IF NOT EXISTS contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)",  insertData);
+// }
+
+db.close((err) => {
+    if (err) {
+        return console.error(err.message);
+    }
+    console.log('Closed database.');
 });
 
-// CREATE TABLE tablename ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );
-// INSERT INTO tablename ( id, name ) VALUES ( null, 'Sample data' );
+// // mysql
+// var mysql = require('mysql');
+
+// var connection = mysql.createConnection({
+//     host     : 'localhost',
+//     user     : 'forumadmin',
+//     password : 'ecs153password',
+//     database : 'mango'
+// });
+
+// connection.connect((err) => {
+//     if (err) throw err;
+//     console.log('Connected!');
+// });
+
+// // CREATE TABLE tablename ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );
+// // INSERT INTO tablename ( id, name ) VALUES ( null, 'Sample data' );
 
 function queryHandler(req, res, next) {
     let url = req.url;
