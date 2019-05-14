@@ -12,10 +12,10 @@ var connection = mysql.createConnection({
   database : 'posts'
 });
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected!');
-});
+// connection.connect((err) => {
+//   if (err) throw err;
+//   console.log('Connected!');
+// });
 
 function queryHandler(req, res, next) {
     let url = req.url;
