@@ -6,16 +6,19 @@ const port = 8080;
 var mysql = require('mysql');
 
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'user',
-  password : 'password',
-  database : 'posts'
+    host     : 'localhost',
+    user     : 'forumadmin',
+    password : 'ecs153password',
+    database : 'mango'
 });
 
-// connection.connect((err) => {
-//   if (err) throw err;
-//   console.log('Connected!');
-// });
+connection.connect((err) => {
+    if (err) throw err;
+    console.log('Connected!');
+});
+
+// CREATE TABLE tablename ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );
+// INSERT INTO tablename ( id, name ) VALUES ( null, 'Sample data' );
 
 function queryHandler(req, res, next) {
     let url = req.url;
