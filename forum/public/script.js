@@ -41,7 +41,7 @@ function sendnewpost() {
 	xhr.onload = function() {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let status = xhr.status; 
-		console.log(responseStr);
+		console.log(responseStr, status);
 	};
 
 	xhr.onerror = function() {

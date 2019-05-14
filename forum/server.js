@@ -1,14 +1,20 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const port = 8000;
+const port = 8080;
 
-var mysql      = require('mysql');
+// mysql
+var mysql = require('mysql');
 
 var connection = mysql.createConnection({
   host     : 'localhost',
-  user     : 'me',
-  password : 'secret',
-  database : 'my_db'
+  user     : 'user',
+  password : 'password',
+  database : 'posts'
+});
+
+connection.connect((err) => {
+  if (err) throw err;
+  console.log('Connected!');
 });
 
 function queryHandler(req, res, next) {
