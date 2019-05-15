@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800');
+
+body {
+	margin: 0;
+	padding: 0;
+	display:flex;
+	font-family: 'Open Sans', sans-serif;
+	/*font-size:0.8em;*/
+	font-size:12px;
+}
+
+
+
+/* total width */
+::-webkit-scrollbar {
+    background-color:rgba(0,0,0,0);
+    width:20px;
+    display:none;
+}
+
+/* background of the scrollbar except button or resizer */
+::-webkit-scrollbar-track {
+    background-color:rgba(0,0,0,0);
+}
+
+/* scrollbar itself */
+::-webkit-scrollbar-thumb {
+    background-color:rgba(255,255,255,0.5);
+    border-radius:16px;
+    border:7px solid #4F5D80;
+}
+
+* {
+	box-sizing: border-box;
+	/*transition: all 0.3s ease;*/
+	/*border: 1px solid black;*/
+}
+*:focus {
+    outline: none;
+}
+
+nav, .rightside, main, article {
+	height:100vh;
+	/*font-size:0.8em;*/
+}
+nav, main, article {
+	/*padding: 30px;*/
+}
+nav, main {
+	color:white;
+}
+nav {
+	width: 200px;
+	background-color:#4169CC;
+	flex: 0 1 auto;
+}
+.nav_logo {
+	padding:30px;
+	height:100px;
+	font-size:2.8em;
+	/*box-shadow: 0px 20px 20px rgba(0,0,0,0.2);*/
+	font-weight:700;
+	background-color:#5181FF;
+}
+.nav_links {
+	padding:0 30px 0 30px;
+	/*padding-top:30px;
+	padding-right:30px;
+	padding-left:30px;
+	padding-bottom:0px;*/
+	overflow-y: overlay;
+	height:calc(100vh - 100px);
+}
+.nav_link {
+	display:block;
+	padding-top:30px;
+	padding-bottom:30px;
+	border-bottom:1px solid rgba(255,255,255,0.2);
+	position: relative;
+	cursor:pointer;
+	transition:all 0.3s ease;
+}
+.nav_link:hover {
+	color: #bbb !important;
+}
+.nav_link:last-of-type {
+	border:0;
+}
+.nav_link:first-line {
+	font-size:1.5em;
+	font-weight:300;
+}
+.nav_link_active::after {
+	content: "";
+    height: 75px;
+    display: block;
+    position: absolute;
+    width: 3px;
+    margin-left: -30px;
+    margin-top: -55px;
+    background-color: white;
+    z-index: 5;
+}
+.nav_link_active:first-line {
+	font-weight:600;
+}
+.nav_link_active::before {
+	transform: rotate(45deg);
+    content: "";
+    height: 20px;
+    display: block;
+    position: absolute;
+    width: 20px;
+    margin-left: 160px;
+    margin-top: 10px;
+    background-color: #434f6d;
+    z-index: 5;
+}
+
+.rightside {
+	width:100%;
+	display:flex;
+	flex: 1;
+}
+
+main {
+	flex: 1;
+	background-color:#4F5D80;
+	/*padding:30px;*/
+	
+}
+.main_top {
+	display:flex;
+	justify-content: space-between;
+	padding:30px;
+	height:100px;
+	/*border-bottom:1px solid rgba(255,255,255,0.5);*/
+}
+.main_title {
+	font-size:2em;
+	font-weight:300;
+}
+.main_search {
+
+}
+.main_newbutton {
+
+}
+.main_articles {
+	padding-left:30px;
+	padding-right:30px;
+	overflow-y: overlay;
+	height: calc(100vh - 100px);
+	background-color: #434f6d;
+}
+.main_article {
+	padding-top:30px;
+	padding-bottom:30px;
+	padding-left:15px;
+	padding-right:15px;
+	border-bottom:1px solid rgba(255,255,255,0.2);
+	display:flex;
+	height:100px;
+	position: relative;
+	cursor:pointer;
+	transition:all 0.3s ease;
+}
+.main_article:hover {
+	color: #bbb !important;
+}
+.main_article:last-of-type {
+	border-bottom:0;
+}
+.main_article_active {
+	box-shadow: 0px 0px 20px 0 rgba(0,0,0,0.2);
+    border: 0;
+}
+.main_article_active::after {
+	content: "";
+    height: 1px;
+    display: block;
+    position: absolute;
+    width: calc(((100vw - 200px) / 2) - 60px);
+    margin-left: -15px;
+    margin-top: -31px;
+    background-color: #434f6d;
+    z-index: 5;
+}
+.main_article_active::before {
+	transform: rotate(45deg);
+    content: "";
+    height: 20px;
+    display: block;
+    position: absolute;
+    width: 20px;
+    margin-left: calc(100% + 7px);
+    margin-top: 10px;
+    background-color: white;
+    z-index: 5;
+}
+
+.main_article_left {
+	width:30px;
+	margin-right:15px;
+}
+.main_article_right {
+	
+}
+.main_article_icon {
+	/*float:left;*/
+	/*margin-right:15px;*/
+	width:30px;
+	height:30px;
+	/*background-color:white;*/
+	border-radius: 50%;
+	overflow:hidden;
+	pointer-events: none;
+	font-size:2.5em !important;
+}
+.main_article_title {
+
+}
+.main_article_author {
+
+}
+article {
+	flex: 1;
+	overflow-y: scroll;
+	padding:30px;
+	color:#434f6d;
+}
+.article_post {
+	padding-bottom:30px;
+	border-bottom:1px solid rgba(0,0,0,0.2);
+}
+.article_reply {
+	padding-top:30px;
+}
