@@ -62,7 +62,7 @@ main {
 	font-size:2.5rem;
 	/*font-weight: ;*/
 	margin-bottom:50px;
-	display:block;
+	display:inline-block;
 }
 
 #new_post_title {
@@ -90,6 +90,7 @@ input[type=text], input[type=submit], select, textarea {
 	/*border:0;*/
 	font-family: inherit;
 	font-size:0.85rem;
+	/*border-radius:5px;*/
 }
 
 input[type=text]:hover, textarea:hover {
@@ -102,7 +103,7 @@ input[type=text]:active, textarea:active {
 
 input[type=submit] {
 	/*-webkit-appearance: button;*/
-	border-radius:4px;
+	/*border-radius:5px;*/
 	background-color:#007bff;
 	color:white;
 	border:0;
@@ -144,6 +145,9 @@ h4 {
 	padding: var(--margin-align);
 	margin-bottom:50px;
 	border: 1px solid #cccccc;
+	background-color:white;
+	z-index: 10;
+	position: relative;
 }
 
 .post {
@@ -153,6 +157,10 @@ h4 {
 	padding: var(--margin-align);
 	border: 1px solid #cccccc;
 }
+#createanimation {
+	margin-top:-159px;
+}
+
 .bar {
 	margin-top: calc(-1 * var(--margin-align));
     margin-left: calc(-1 * var(--margin-align));

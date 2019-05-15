@@ -24,7 +24,7 @@
 	</nav>
 
 	<main id="main">
-		<span class="pagetitle">Mango Forum</span> <span style="float:right;cursor:pointer;" onclick="clearposts();">Clear Posts</span>
+		<span class="pagetitle">Mango Forum</span> <span style="float:right;cursor:pointer;" onclick="clearposts();">Clear All Posts</span>
 		<div class="form">
 			<div class="bar">Create Post</div>
 			<!-- <label for="new_title">New Post Title</label> -->
@@ -33,16 +33,15 @@
 			<!-- <label for="new_content">Content</label> -->
 			<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
 
-			<input type="submit" value="Create Post" onclick="sendnewpost();">
+			<input type="submit" id="new_post_button" value="Create Post" onclick="sendnewpost();">
 		</div>
+
+		<!-- <div class="post" id="createanimation">
+			<div class="bar">&nbsp;<span class="datetime"></span></div>
+			<h3></h3>
+		</div> -->
 
 		<!-- <div class="post">
-			<div class="bar">Author<span class="datetime">5/12/19 3:36pm</span></div>
-			<h3>Example Post Title</h3>
-			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		</div>
-
-		<div class="post">
 			<div class="bar">John Smith <span class="datetime">5/12/19 3:36pm</span></div>
 			<h3>Example Post Title</h3><br>
 			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
