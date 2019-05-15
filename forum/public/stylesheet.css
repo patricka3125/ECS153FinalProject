@@ -65,7 +65,7 @@ main {
 	display:block;
 }
 
-#new_title {
+#new_post_title {
 	font-size:1.2rem;
 	font-weight:bold;
 	margin-bottom: calc(var(--margin-align) - 5px);
@@ -120,6 +120,7 @@ h1, h2, h3, h4, h5 {
 	margin:0;
 	padding:0;
 	display:inline-block;
+	font-weight:bold;
 }
 
 h3 {
