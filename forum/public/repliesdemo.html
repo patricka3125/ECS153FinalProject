@@ -16,14 +16,12 @@
 	<nav>
 		<span class="logo">Mango Forum</span>
 		<span class="navlinks">
-			<span class="navlink" onclick="window.location.href = 'repliesdemo.html';">Replies Demo Page</span>
-			<!-- <span class="navlink">Settings</span>
-			<span class="navlink">Login</span> -->
+			<span class="navlink" onclick="window.location.href = '../';">Back to working version</span>
 		</span>
 	</nav>
 
 	<main id="main">
-		<span class="pagetitle">Mango Forum</span> <span style="float:right;cursor:pointer;" onclick="clearposts();">Clear All Posts</span>
+		<span class="pagetitle">Replies Demo</span> <span style="float:right;cursor:pointer;" onclick="">Clear All Posts</span>
 		<div class="form">
 			<div class="bar">Create Post</div>
 			<!-- <label for="new_title">New Post Title</label> -->
@@ -32,7 +30,7 @@
 			<!-- <label for="new_content">Content</label> -->
 			<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
 
-			<input type="submit" id="new_post_button" value="Create Post" onclick="sendnewpost();">
+			<input type="submit" id="new_post_button" value="Create Post" onclick="">
 		</div>
 
 		<!-- <div class="post" id="createanimation">
@@ -40,7 +38,7 @@
 			<h3></h3>
 		</div> -->
 
-		<!-- <div class="post">
+		<div class="post">
 			<div class="bar">John Smith <span class="datetime">5/12/19 3:36pm</span></div>
 			<h3>Example Post Title</h3><br>
 			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -88,12 +86,25 @@
 					<input type="submit" value="Create Reply" onclick="">
 				</div>
 			</div>
-		</div> -->
+		</div>
 			
 	</main>
 
-	<script src="script.js"></script>
+	<!-- <script src="script.js"></script> -->
 	<script>
+		// auto-height textarea
+		// from https://stackoverflow.com/a/25621277
+		var tx = document.getElementsByTagName('textarea');
+		for (var i = 0; i < tx.length; i++) {
+		  tx[i].setAttribute('style', 'height:' + (tx[i].scrollHeight) + 'px;overflow-y:hidden;');
+		  tx[i].addEventListener("input", OnInput, false);
+		}
+
+		function OnInput() {
+		  this.style.height = 'auto';
+		  this.style.height = (this.scrollHeight) + 'px';
+		}
+		
 		function toggle(postid) {
 			let element = document.getElementById("post_" + postid + "_replies");
 			let arrow = document.getElementById("arrow_" + postid);
