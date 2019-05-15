@@ -68,7 +68,9 @@ nav {
 	padding-right:30px;
 	padding-left:30px;
 	padding-bottom:0px;*/
+	overflow-y:auto;
 	overflow-y: overlay;
+	overflow-x:hidden;
 	height:calc(100vh - 100px);
 }
 .nav_link {
@@ -149,9 +151,11 @@ main {
 .main_articles {
 	padding-left:30px;
 	padding-right:30px;
+	overflow-y:auto;
 	overflow-y: overlay;
 	height: calc(100vh - 100px);
 	background-color: #434f6d;
+	overflow-x:hidden;
 }
 .main_article {
 	padding-top:30px;
@@ -225,14 +229,17 @@ main {
 }
 article {
 	flex: 1;
-	overflow-y: scroll;
+	overflow-y: auto;
 	padding:30px;
 	color:#434f6d;
+	transition: all 0.8s ease;
 }
 .article_post {
 	padding-bottom:30px;
 	border-bottom:1px solid rgba(0,0,0,0.2);
+	min-width: 100px;
 }
 .article_reply {
 	padding-top:30px;
+	min-width: 100px;
 }
