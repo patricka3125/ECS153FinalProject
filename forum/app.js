@@ -112,15 +112,21 @@ function deletecategory (req, res, next) {
     if (qobj.categoryid != undefined) {
         // categoryid should be int only
 
-        let sqlquery = "DELETE FROM categories WHERE category_id=?";
+        let sqlquery = "DELETE FROM categories WHERE category_id=" + qobj.categoryid;
 
-        // also do in the future:
+        // also do:
         // let sqlquery = "DELETE FROM posts WHERE category_id=?";
         // let sqlquery = "DELETE FROM replies WHERE category_id=?";
 
         let myresult = "deleted";
 
-        db.run(sqlquery, [qobj.categoryid]);
+        db.run(sqlquery, function(err) {
+            sqlquery = "DELETE FROM posts WHERE category_id=" + qobj.categoryid;
+            db.run(sqlquery, function(err) {
+                sqlquery = "DELETE FROM replies WHERE category_id=" + qobj.categoryid;
+                db.run(sqlquery);
+            });
+        });
 
         res.send(myresult);
     }
@@ -261,12 +267,12 @@ function newreply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "INSERT INTO posts(category_id, post_id, date_created, content) VALUES(?, ?, ?, ?)";
+        let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content) VALUES(?, ?, ?, ?)";
         
         // let new_title = SqlString.escape(req.body.title);
         let new_content = SqlString.escape(req.body.content);
         let new_datetime = new Date(); 
-        new_datetime = SqlString.escape(datetime);
+        new_datetime = SqlString.escape(new_datetime);
 
         let myresult = "inserted";
 

@@ -1,0 +1,43 @@
+<!doctype HTML>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Forum</title>
+</head>
+
+<body>
+	<style>
+		div {
+			border: 1px solid gray;
+			margin-bottom:10px;
+			box-sizing: border-box;
+			padding:10px;
+		}
+		h1, h2, h3, h4 {
+			margin:0px;
+		}
+	</style>
+	<h1>Forum Tester</h1>
+	<div id="categories">
+		<h2>Categories</h2>
+		<div>
+			<h3>create new category</h3>
+			<input type="text" id="category_name" placeholder="name">
+			<input type="button" onclick="newcategory()" value="create category">
+		</div>
+	</div>
+	<br><br>
+	<div id="showtables">
+		<h2>Tables</h2>
+		<div id="table_categories"></div>
+		<div id="table_posts"></div>
+		<div id="table_replies"></div>
+	</div>
+	<input type="button" value="update tables" onclick="updatetables()">
+
+	<script src="tester.js"></script>
+</body>
+</html>
+
