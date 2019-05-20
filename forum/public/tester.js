@@ -55,7 +55,7 @@ function displaycategories () {
 		for (let i = 0; i < object.length; i++) {
 			let newcategory = document.createElement('div');
 			newcategory.id = "category_" + object[i].category_id;
-			newcategory.innerHTML = "<input type='button' value='delete category' style='float:right;' onclick='deletecategory("+object[i].category_id+")'><h2>" + object[i].title + "</h2> (id: " +object[i].category_id+ ", public: " + object[i].public + ")";
+			newcategory.innerHTML = "<input type='button' value='delete category' style='float:right;' onclick='deletecategory("+object[i].category_id+")'>"+"<input type='button' value='edit category' style='float:right;text-decoration:line-through;'>"+"<h2>" + object[i].title + "</h2> (id: " +object[i].category_id+ ", public: " + object[i].public + ")";
 
 			let postcreator = document.createElement('div');
 			postcreator.innerHTML = '<input type="text" id="post_title_'+object[i].category_id+'" placeholder="title"><input type="text" id="post_content_'+object[i].category_id+'" placeholder="content"><input type="button" onclick="newpost('+object[i].category_id+')" value="create post">';
@@ -92,7 +92,7 @@ function updateposts(categoryid) {
 		for (let i = 0; i < object.length; i++) {
 			let newpost = document.createElement('div');
 			newpost.id = "post_" + object[i].category_id + "_" + object[i].post_id;
-			newpost.innerHTML = "<input type='button' value='delete post' style='float:right;' onclick='deletepost("+object[i].category_id+","+object[i].post_id+")'>"+"<h3>" + object[i].title + "</h3> (id: " +object[i].category_id+ "_" + object[i].post_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
+			newpost.innerHTML = "<input type='button' value='delete post' style='float:right;' onclick='deletepost("+object[i].category_id+","+object[i].post_id+")'>"+"<input type='button' value='edit post' style='float:right;text-decoration:line-through;'>"+"<h3>" + object[i].title + "</h3> (id: " +object[i].category_id+ "_" + object[i].post_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
 
 			let replycreator = document.createElement('div');
 			replycreator.innerHTML = '<input type="text" id="reply_content_'+object[i].category_id+"_"+object[i].post_id+'" placeholder="content"><input type="button" onclick="newreply('+object[i].category_id+","+object[i].post_id+')" value="create reply">';
@@ -126,7 +126,7 @@ function updatereplies(categoryid, postid) {
 		for (let i = 0; i < object.length; i++) {
 			let newreply = document.createElement('div');
 			newreply.id = "reply_" + object[i].category_id + "_" + object[i].post_id + "_" + object[i].post_id;
-			newreply.innerHTML = "<input type='button' value='delete reply' style='float:right;' onclick='deletereply("+object[i].category_id+","+object[i].post_id+","+object[i].reply_id+")'>"+"(id: " +object[i].category_id+ "_" + object[i].post_id + "_" + object[i].reply_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
+			newreply.innerHTML = "<input type='button' value='delete reply' style='float:right;' onclick='deletereply("+object[i].category_id+","+object[i].post_id+","+object[i].reply_id+")'>"+"<input type='button' value='edit reply' style='float:right;text-decoration:line-through;'>"+"(id: " +object[i].category_id+ "_" + object[i].post_id + "_" + object[i].reply_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
 
 			// let replycreator = document.createElement('div');
 			// replycreator.innerHTML = '<input type="text" id="reply_content_'+object[i].category_id+"_"+object[i].post_id+'" placeholder="content"><input type="button" onclick="newreply('+object[i].category_id+","+object[i].post_id+')" value="create reply">';
