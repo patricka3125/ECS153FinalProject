@@ -14,89 +14,333 @@ const db = new sqlite3.Database(dbFileName, (err) => {
     if (err) {
         console.error(err.message);
     } else {
-        console.log('Created/connected to the database.');
-        console.log("create database table basicposts");
-        db.run("CREATE TABLE IF NOT EXISTS basicposts(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, date DATETIME, content TEXT)"); //,  insertData);
+        // console.log('Created/connected to the database.');
+        console.log("Setting up database");
+        
+        // categories: category_id, title, public
+        db.run("CREATE TABLE IF NOT EXISTS categories(category_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, public INTEGER)", creationerror(err)); 
+        // posts: category_id, post_id, user_id, date_created, title, content
+        db.run("CREATE TABLE IF NOT EXISTS posts(category_id INTEGER, post_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date_created DATETIME, title TEXT, content TEXT)", creationerror(err)); 
+        // replies: category_id, post_id, reply_id, user_id, date_created, content
+        db.run("CREATE TABLE IF NOT EXISTS replies(category_id INTEGER, post_id INTEGER, reply_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date_created DATETIME, content TEXT)", creationerror(err)); 
+        // roles: category_id, user_id, role
+        db.run("CREATE TABLE IF NOT EXISTS roles(category_id INTEGER, user_id INTEGER, role INTEGER)"); 
     }
 });
 
+function creationerror(err) {
+    if(err) {
+        console.log(err);
+    }
+}
 
-// // mysql
-// var mysql = require('mysql');
+// // https://www.techiediaries.com/node-sqlite-crud/
+// function readsql() {
+//     console.log("Read data from basicposts");
+//     db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
+//         rows.forEach(function (row) {
+//             console.log(row.id + ": " + row.title + "; " + row.date + "; " + row.content);
+//         });
+//     });
+// }
 
-// var connection = mysql.createConnection({
-//     host     : 'localhost',
-//     user     : 'forumadmin',
-//     password : 'ecs153password',
-//     database : 'mango'
-// });
+// function newpostHandler(req, res, next) {
+//     // let url = req.url;
+//     // let qObj = req.query;
+//     // console.log(qObj);
+//     // console.log(typeof(req));
+//     // console.log()
+//     let title = SqlString.escape(req.body.title);
+//     let content = SqlString.escape(req.body.content);
+//     let datetime = new Date(); //.toUTCString();
+//     datetime = SqlString.escape(datetime);
+//     console.log(req.body, req.body.title, req.body.content);
 
-// connection.connect((err) => {
-//     if (err) throw err;
-//     console.log('Connected!');
-// });
+//     db.run('INSERT INTO basicposts(title, date, content) VALUES (?, ?, ?)', [title, datetime, content]);
 
-// // CREATE TABLE tablename ( id smallint unsigned not null auto_increment, name varchar(20) not null, constraint pk_example primary key (id) );
-// // INSERT INTO tablename ( id, name ) VALUES ( null, 'Sample data' );
+//     readsql();
 
-function queryHandler(req, res, next) {
-    let url = req.url;
-    let qObj = req.query;
-    console.log(qObj);
+//     res.send("done!");
+// }
+
+// function getpostsHandler(req, res, next) {
     
-    if (qObj.english != undefined) {
-	    // res.json( {"beast" : qObj.animal} );
-        // res.json({ "palindrome": qObj.word + qObj.word.split("").reverse().join("") })
-        res.json({ "English": qObj.english, "Chinese (Traditional)": translation});
+//     db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
+//         res.send(rows);
+//     });
+
+// }
+
+// function clearpostsHandler(req, res, next) {
+    
+//     db.all("DELETE FROM basicposts");
+//     res.send("done!");
+
+// }
+
+// ===============================================================================
+
+function newcategory (req, res, next) {
+    // Create new category
+    // /newcategory?categoryname=___&public=___
+
+    let qobj = req.query;
+    if (qobj.categoryname != undefined && qobj.public != undefined) {
+        // category name should be alpha only
+        // public should be boolean only
+
+        let sqlquery = "INSERT INTO categories(title, public) VALUES(?, ?)";
+        let myresult = "inserted";
+
+        console.log(qobj.categoryname, qobj.public);
+
+        db.run(sqlquery, [qobj.categoryname, qobj.public]);
+
+        res.send(myresult);
     }
     else {
-	next();
+        console.log("Undefined");
+        next();
     }
 }
 
-// https://www.techiediaries.com/node-sqlite-crud/
-function readsql() {
-    console.log("Read data from basicposts");
-    db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
-        rows.forEach(function (row) {
-            console.log(row.id + ": " + row.title + "; " + row.date + "; " + row.content);
-        });
-    });
+function deletecategory (req, res, next) {
+    // Delete category:
+    // /deletecategory?categoryid=___
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined) {
+        // categoryid should be int only
+
+        let sqlquery = "DELETE FROM categories WHERE category_id=?";
+
+        // also do in the future:
+        // let sqlquery = "DELETE FROM posts WHERE category_id=?";
+        // let sqlquery = "DELETE FROM replies WHERE category_id=?";
+
+        let myresult = "deleted";
+
+        db.run(sqlquery, [qobj.categoryid]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
 }
 
-function newpostHandler(req, res, next) {
-    // let url = req.url;
-    // let qObj = req.query;
-    // console.log(qObj);
-    // console.log(typeof(req));
-    // console.log()
-    let title = SqlString.escape(req.body.title);
-    let content = SqlString.escape(req.body.content);
-    let datetime = new Date(); //.toUTCString();
-    datetime = SqlString.escape(datetime);
-    console.log(req.body, req.body.title, req.body.content);
+function getcategorynames (req, res, next) {
+    // Get categorynames:
+    // /getcategorynames
 
-    db.run('INSERT INTO basicposts(title, date, content) VALUES (?, ?, ?)', [title, datetime, content]);
+    let sqlquery = "SELECT * FROM categories";
 
-    readsql();
-
-    res.send("done!");
-}
-
-function getpostsHandler(req, res, next) {
-    
-    db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
+    db.all(sqlquery, function(err, rows) {
         res.send(rows);
     });
-
 }
 
-function clearpostsHandler(req, res, next) {
-    
-    db.all("DELETE FROM basicposts");
-    res.send("done!");
+function getcategoryposts (req, res, next) {
+    // Get categoryposts:
+    // /getcategoryposts?categoryid=___
 
+    let qobj = req.query;
+    if (qobj.categoryid != undefined) {
+        // categoryid should be int only
+
+        let sqlquery = "SELECT * FROM posts WHERE category_id=" + qobj.categoryid;
+
+        db.all(sqlquery, function(err, rows) {
+            res.send(rows);
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
 }
+
+function newpost (req, res, next) {
+    // Create new post
+    // /newpost?categoryid=___                            [title, content]
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined) {
+        let sqlquery = "INSERT INTO posts(category_id, date_created, title, content) VALUES(?, ?, ?, ?)";
+        
+        let new_title = SqlString.escape(req.body.title);
+        let new_content = SqlString.escape(req.body.content);
+        let new_datetime = new Date(); 
+        new_datetime = SqlString.escape(new_datetime);
+
+        let myresult = "inserted";
+
+        db.run(sqlquery, [qobj.categoryid, new_datetime, new_title, new_content]);
+
+        console.log("creating: ", qobj.categoryid, new_datetime, new_title, new_content);
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function editpost (req, res, next) {
+    // Edit post:
+    // /editpost?categoryid=___&postid=___                [title, content]
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined) {
+        let sqlquery = "UPDATE posts SET title=?, content=? WHERE category_id=? AND post_id=? LIMIT 1";
+        
+        let new_title = SqlString.escape(req.body.title);
+        let new_content = SqlString.escape(req.body.content);
+
+        let myresult = "edited";
+
+        db.run(sqlquery, [new_title, new_content, qobj.categoryid, qobj.postid]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+function deletepost (req, res, next) {
+    // Delete post:
+    // /deletepost?categoryid=___&postid=___
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined) {
+        let sqlquery = "DELETE FROM posts WHERE category_id=? AND post_id=? LIMIT 1";
+        let myresult = "deleted";
+
+        db.run(sqlquery, [qobj.categoryid, qobj.postid]);
+
+        sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=?";
+        db.run(sqlquery, [qobj.categoryid, qobj.postid]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function getpost (req, res, next) {
+    // Get post (and replies)
+    // /getpost?categoryid=___&postid=___
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined) {
+        // categoryid should be int only
+
+        let sqlquery = "SELECT * FROM posts WHERE category_id=? AND post_id=?";
+
+        db.get(sqlquery, [qobj.categoryid, qobj.postid], function(err, row) {
+            sqlquery = "SELECT * FROM replies WHERE category_id=? AND post_id=?";
+
+            db.all(sqlquery, [qobj.categoryid, qobj.postid], function(err, rows) {
+                res.send([row, rows]);
+            });
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function newreply (req, res, next) {
+    // Create new reply
+    // /newreply?categoryid=___&postid=___                [content]
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined) {
+        let sqlquery = "INSERT INTO posts(category_id, post_id, date_created, content) VALUES(?, ?, ?, ?)";
+        
+        // let new_title = SqlString.escape(req.body.title);
+        let new_content = SqlString.escape(req.body.content);
+        let new_datetime = new Date(); 
+        new_datetime = SqlString.escape(datetime);
+
+        let myresult = "inserted";
+
+        db.run(sqlquery, [qobj.categoryid, qobj.postid, new_datetime, new_content]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function editreply (req, res, next) {
+    // Edit reply:
+    // /editreply?categoryid=___&postid=___&replyid=___   [content]
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
+        let sqlquery = "UPDATE replies SET content=? WHERE category_id=? AND post_id=? AND reply_id=? LIMIT 1";
+        
+        let new_content = SqlString.escape(req.body.content);
+
+        let myresult = "edited";
+
+        db.run(sqlquery, [new_content, qobj.categoryid, qobj.postid, qobj.replyid]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function deletereply (req, res, next) {
+    // Delete reply:
+    // /deletereply?categoryid=___&postid=___&replyid=___
+
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
+        let sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=? AND reply_id=? LIMIT 1";
+
+        let myresult = "deleted";
+
+        db.run(sqlquery, [qobj.categoryid, qobj.postid, qobj.replyid]);
+
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function gettable( req, res, next) {
+    // get table - for debugging only
+    // /gettable?table=___
+
+    let qobj = req.query;
+    if(qobj.table != undefined) {
+        let sqlquery = "SELECT * FROM " + qobj.table;
+
+        db.all(sqlquery, function(err, rows) {
+            res.send(rows);
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+// ===============================================================================
 
 function fileNotFound(req, res) {
     let url = req.url;
@@ -110,18 +354,30 @@ const app = express()
 
 app.use(express.static('public'));  // can I find a static file? 
 
-app.get('/query', queryHandler );   // if not, is it a valid query?
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/getposts', getpostsHandler);
-app.post('/newpost', newpostHandler);
-app.get('/clearposts', clearpostsHandler);
+// app.get('/getposts', getpostsHandler);
+// app.post('/newpost', newpostHandler);
+// app.get('/clearposts', clearpostsHandler);
+
+app.get('/newcategory', newcategory);
+app.get('/deletecategory', deletecategory);
+app.get('/getcategorynames', getcategorynames);
+app.get('/getcategoryposts', getcategoryposts);
+app.post('/newpost', newpost);
+app.post('/editpost', editpost);
+app.get('/deletepost', deletepost);
+app.get('/getpost', getpost);
+app.post('/newreply', newreply);
+app.post('/editreply', editreply);
+app.get('/deletereply', deletereply);
+
+app.get('/gettable', gettable);
 
 /* SERVER 
 
-Create new category:    GET  /newcategory?categoryname=___
+Create new category:    GET  /newcategory?categoryname=___&public=___
 Delete category:        GET  /deletecategory?categoryid=___
 Get categorynames:      GET  /getcategorynames
     
@@ -134,29 +390,14 @@ Get post (and replies): GET  /getpost?categoryid=___&postid=___
 
 Create new reply:       POST /newreply?categoryid=___&postid=___                [content]
 Edit reply:             POST /editreply?categoryid=___&postid=___&replyid=___   [content]
+Delete reply:           GET  /deletereply?categoryid=___&postid=___&replyid=___
 
 */
 
-// app.get('/newpost', newpostHandler );   // if not, is it a valid query?
-// app.get('/translate', queryHandler );   // if not, is it a valid query?
-app.use( fileNotFound );            // otherwise not found
+app.use( fileNotFound ); 
 
-// app.listen(port, function (){console.log('Listening...');} )
- 
-if (module === require.main) {
-  // [START server]
-  // Start the server
-  const server = app.listen(process.env.PORT || 8080, () => {
-    const port = server.address().port;
+const server = app.listen(process.env.PORT || port, () => {
     console.log(`App listening on port ${port}`);
-  });
-  // [END server]
-    // db.close((err) => {
-    //     if (err) {
-    //         return console.error(err.message);
-    //     }
-    //     console.log('Closed database.');
-    // });
-}
+});
 
 module.exports = app;
