@@ -92,7 +92,7 @@ function updateposts(categoryid) {
 		for (let i = 0; i < object.length; i++) {
 			let newpost = document.createElement('div');
 			newpost.id = "post_" + object[i].category_id + "_" + object[i].post_id;
-			newpost.innerHTML = "<h3>" + object[i].title + "</h3> (id: " +object[i].category_id+ "_" + object[i].post_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
+			newpost.innerHTML = "<input type='button' value='delete post' style='float:right;' onclick='deletepost("+object[i].category_id+","+object[i].post_id+")'>"+"<h3>" + object[i].title + "</h3> (id: " +object[i].category_id+ "_" + object[i].post_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
 
 			let replycreator = document.createElement('div');
 			replycreator.innerHTML = '<input type="text" id="reply_content_'+object[i].category_id+"_"+object[i].post_id+'" placeholder="content"><input type="button" onclick="newreply('+object[i].category_id+","+object[i].post_id+')" value="create reply">';
@@ -126,7 +126,7 @@ function updatereplies(categoryid, postid) {
 		for (let i = 0; i < object.length; i++) {
 			let newreply = document.createElement('div');
 			newreply.id = "reply_" + object[i].category_id + "_" + object[i].post_id + "_" + object[i].post_id;
-			newreply.innerHTML = "(id: " +object[i].category_id+ "_" + object[i].post_id + "_" + object[i].reply_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
+			newreply.innerHTML = "<input type='button' value='delete reply' style='float:right;' onclick='deletereply("+object[i].category_id+","+object[i].post_id+","+object[i].reply_id+")'>"+"(id: " +object[i].category_id+ "_" + object[i].post_id + "_" + object[i].reply_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
 
 			// let replycreator = document.createElement('div');
 			// replycreator.innerHTML = '<input type="text" id="reply_content_'+object[i].category_id+"_"+object[i].post_id+'" placeholder="content"><input type="button" onclick="newreply('+object[i].category_id+","+object[i].post_id+')" value="create reply">';
@@ -138,6 +138,37 @@ function updatereplies(categoryid, postid) {
 	};
 
 	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+
+function newcategory() {
+	let newname = document.getElementById("category_name").value;
+	let public = document.getElementById("category_public").value;
+	// let content = document.getElementById("post_content_" + categoryid);
+	// let mydata = {
+	// 	"title": title.value,
+	// 	"content": content.value
+	// };
+
+	let url = "/newcategory?categoryname=" + newname + "&public=" + public;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {
+	  	throw new Error('CORS not supported');
+	}
+
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		let responseStr = xhr.responseText;  // get the JSON string 
+		let status = xhr.status; 
+		console.log(responseStr, status);
+		window.location.reload(false); 
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+
+	// Actually send request to server
+	// console.log(JSON.stringify(mydata));
 	xhr.send();
 }
 
@@ -161,6 +192,7 @@ function newpost(categoryid) {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let status = xhr.status; 
 		console.log(responseStr, status);
+		window.location.reload(false); 
 	};
 
 	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
@@ -190,6 +222,7 @@ function newreply(categoryid, postid) {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let status = xhr.status; 
 		console.log(responseStr, status);
+		window.location.reload(false); 
 	};
 
 	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
@@ -197,6 +230,54 @@ function newreply(categoryid, postid) {
 	// Actually send request to server
 	console.log(JSON.stringify(mydata));
 	xhr.send(JSON.stringify(mydata));
+}
+
+function deletecategory(categoryid) {
+
+	let url = "/deletecategory?categoryid=" + categoryid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		console.log(xhr.responseText, xhr.status);
+		window.location.reload(false); 
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
+}
+
+function deletepost(categoryid, postid) {
+
+	let url = "/deletepost?categoryid=" + categoryid + "&postid=" + postid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		console.log(xhr.responseText, xhr.status);
+		window.location.reload(false); 
+	};
+	
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
+}
+
+function deletereply(categoryid, postid, replyid) {
+
+	let url = "/deletereply?categoryid=" + categoryid + "&postid=" + postid + "&replyid=" + replyid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		console.log(xhr.responseText, xhr.status);
+		window.location.reload(false); 
+	};
+	
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
 }
 
 setupforum();

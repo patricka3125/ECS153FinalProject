@@ -193,7 +193,7 @@ function newpost (req, res, next) {
     }
 }
 
-function editpost (req, res, next) {
+function editpost (req, res, next) { // ################################fix string
     // Edit post:
     // /editpost?categoryid=___&postid=___                [title, content]
 
@@ -221,13 +221,13 @@ function deletepost (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "DELETE FROM posts WHERE category_id=? AND post_id=? LIMIT 1";
+        let sqlquery = "DELETE FROM posts WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
         let myresult = "deleted";
 
-        db.run(sqlquery, [qobj.categoryid, qobj.postid]);
+        db.run(sqlquery);
 
-        sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=?";
-        db.run(sqlquery, [qobj.categoryid, qobj.postid]);
+        sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
+        db.run(sqlquery);
 
         res.send(myresult);
     }
@@ -237,7 +237,7 @@ function deletepost (req, res, next) {
     }
 }
 
-function getpost (req, res, next) {
+function getpost (req, res, next) { // ################################fix string
     // Get post (and replies)
     // /getpost?categoryid=___&postid=___
 
@@ -286,7 +286,7 @@ function newreply (req, res, next) {
     }
 }
 
-function editreply (req, res, next) {
+function editreply (req, res, next) { // ################################fix string
     // Edit reply:
     // /editreply?categoryid=___&postid=___&replyid=___   [content]
 
@@ -314,11 +314,12 @@ function deletereply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
-        let sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=? AND reply_id=? LIMIT 1";
+        // console.log(qobj.categoryid, qobj.postid, qobj.replyid);
+        let sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid+" AND reply_id="+qobj.replyid;
 
         let myresult = "deleted";
 
-        db.run(sqlquery, [qobj.categoryid, qobj.postid, qobj.replyid]);
+        db.run(sqlquery);
 
         res.send(myresult);
     }
