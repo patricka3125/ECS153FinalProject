@@ -119,6 +119,24 @@ app.get('/getposts', getpostsHandler);
 app.post('/newpost', newpostHandler);
 app.get('/clearposts', clearpostsHandler);
 
+/* SERVER 
+
+Create new category:    GET  /newcategory?categoryname=___
+Delete category:        GET  /deletecategory?categoryid=___
+Get categorynames:      GET  /getcategorynames
+    
+Get categoryposts:      GET  /getcategoryposts?categoryid=___
+
+Create new post:        POST /newpost?categoryid=___                            [title, content]
+Edit post:              POST /editpost?categoryid=___&postid=___                [title, content]
+Delete post:            GET  /deletepost?categoryid=___&postid=___
+Get post (and replies): GET  /getpost?categoryid=___&postid=___
+
+Create new reply:       POST /newreply?categoryid=___&postid=___                [content]
+Edit reply:             POST /editreply?categoryid=___&postid=___&replyid=___   [content]
+
+*/
+
 // app.get('/newpost', newpostHandler );   // if not, is it a valid query?
 // app.get('/translate', queryHandler );   // if not, is it a valid query?
 app.use( fileNotFound );            // otherwise not found

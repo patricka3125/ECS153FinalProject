@@ -1,6 +1,6 @@
-# Meeting 1
-# 5/15/2019 
-# Jonathan Hsu, Patrick Liao, Zaprin Ignatiev
+## Meeting 1
+### 5/15/2019 
+### Jonathan Hsu, Patrick Liao, Zaprin Ignatiev
 
 1. What we did
 This week we implemented basic get/post functionality and setup a basic database. 
