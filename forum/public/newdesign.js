@@ -52,6 +52,7 @@ function newarticle_editor() {
 	article.innerHTML = `
 	<input type="text" class="new_post_title" id="new_post_title" name="new_title" placeholder="New Post Title">
 	<textarea class="new_post_content" id="new_post_content" name="new_content" placeholder="Write something.."></textarea>
+	<input type="submit" class="new_post_button" id="new_post_button" value="Create Post" onclick="createpost();">
 	`;
 	// let main_articlecreator = createElement(main_articlecreator_htmlstring);
 	// article.prepend(main_articlecreator);
@@ -178,11 +179,12 @@ function getposts(categoryid, postid) {
 		let main_articles = document.getElementById("main_articles");
 		main_articles.innerHTML = "";
 
-		for (let i = 0; i < object.length; i++) {
+		// for (let i = 0; i < object.length; i++) {
+		for (let i = object.length-1; i >= 0; i--) {
 
 			let activepostclass = "";
 			let workingpostid = object[i].category_id + "_" + object[i].post_id;
-			if (postid == "default" && i == 0) {
+			if (postid == "default" && i == object.length-1) {
 				activepostclass = "main_article_active";
 				currentpost = object[i].post_id;
 				getpost(object[i].category_id, object[i].post_id);
@@ -261,7 +263,7 @@ function getpost(categoryid, postid) {
 
 				// create new post
 				let reply_htmlstring = `
-					<b>`+object[i].author+`</b> on `+object[i].date_created.slice(1, -1)+`<br><br>
+					By <b>`+object[i].author+`</b> on `+object[i].date_created.slice(1, -1)+`<br><br>
 					`+object[i].content.slice(1, -1)+`<br><br>
 					<hr class="article_reply_break"><br><br>`;
 
@@ -276,6 +278,7 @@ function getpost(categoryid, postid) {
 			<div class="article_createreply">
 				<br><h3>Create Reply</h3>
 				<textarea class="article_createreply_content" id="article_createreply_content" name="new_content" placeholder="Write something.."></textarea>
+				<input type="submit" class="new_reply_button" id="new_reply_button" value="Create Reply" onclick="createreply(`+categoryid+`,`+postid+`);">
 			</div>
 			
 		`
@@ -307,6 +310,62 @@ function deletepost(categoryid, postid) {
 
 	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
 	xhr.send();
+}
+function createpost() {
+	let title = document.getElementById("new_post_title");
+	let content = document.getElementById("new_post_content");
+	let mydata = {
+		"title": title.value,
+		"content": content.value
+	};
+
+	let url = "/newpost?categoryid=" + currentcategory;
+	let xhr = createCORSRequest('POST', url);
+	if (!xhr) {throw new Error('CORS not supported');}
+
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		let responseStr = xhr.responseText;  // get the JSON string 
+		let status = xhr.status; 
+		console.log(responseStr, status);
+
+		switchpost(currentcategory, "default");
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+
+	// Actually send request to server
+	console.log(JSON.stringify(mydata));
+	xhr.send(JSON.stringify(mydata));
+}
+
+function createreply(categoryid, postid) {
+	let content = document.getElementById("article_createreply_content");
+	let mydata = {
+		"content": content.value
+	};
+
+	let url = "/newreply?categoryid=" + categoryid + "&postid=" + postid;
+	let xhr = createCORSRequest('POST', url);
+	if (!xhr) {
+	  	throw new Error('CORS not supported');
+	}
+
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		let responseStr = xhr.responseText;  // get the JSON string 
+		let status = xhr.status; 
+		console.log(responseStr, status);
+		getposts(categoryid, postid);
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+
+	// Actually send request to server
+	console.log(JSON.stringify(mydata));
+	xhr.send(JSON.stringify(mydata));
 }
 
 getcategories("default");
