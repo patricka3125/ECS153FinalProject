@@ -28,7 +28,7 @@ const db = new sqlite3.Database(dbFileName, (err) => {
 
         // users: id, user_id, password
         db.run("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + "username VARCHAR(45), password VARCHAR(45))", creationerror(err));
+            + "username VARCHAR(45), password VARCHAR(45), role INTEGER)", creationerror(err));
     }
 });
 
@@ -354,12 +354,12 @@ function gettable( req, res, next) {
 function create_user(req,res,next) {
     let qobj = req.query;
     if(qobj.username != undefined && qobj.password != undefined) {
-        let sqlquery = "INSERT INTO users (username,password)" 
-            + "VALUES(?,?)";
+        let sqlquery = "INSERT INTO users (username,password, role)" 
+            + "VALUES(?,?,?)";
 
         let myresult = "sign up success!";
 
-        db.run(sqlquery, [qobj.username, qobj.password]);
+        db.run(sqlquery, [qobj.username, qobj.password, qobj.role]);
         res.send(myresult);
     }
     else {
