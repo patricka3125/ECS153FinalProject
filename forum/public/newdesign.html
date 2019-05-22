@@ -14,6 +14,9 @@
 	<nav>
 		<div class="nav_logo">mango</div>
 		<div class="nav_links" id="nav_links">
+			<div class="nav_link" style="border:0;">
+				Loading Categories...
+			</div>
 			<!-- <div class="nav_link">
 				<i class="material-icons nav_delete" onclick="deletecategory(1);">close</i>
 				<span class="nav_link_text" onclick="switchcategory(1);">
@@ -47,12 +50,17 @@
 				<span class="main_newbutton" onclick="newarticle_editor();">+</span>
 			</div>
 			<div class="main_articles" id="main_articles">
+
+				<div class="main_article" style="box-shadow:0;border:0">
+					Loading Posts...
+				</div>
 				<!-- <div class="main_article">
 					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
 					<div class="main_article_right">
 						<span class="main_article_title">Article 1</span><br>
 						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
 					</div>
+					<i class="material-icons main_article_delete">close</i>
 				</div>
 				<div class="main_article main_article_active">
 					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
@@ -106,15 +114,16 @@
 			</div>
 		</main>
 
-		<article>
+		<article id="article">
 			<div class="article_post">
-				<h3>My Article: New Article with content.</h3>
+				<h3>Loading Post...</h3>
+				<!-- <h3>My Article: New Article with content.</h3>
 				By <b>Jonathan Hsu</b> on 3 January 2017<br><br>
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Proin fermentum leo vel orci porta non pulvinar. Ut diam quam nulla porttitor massa id neque aliquam vestibulum. Velit laoreet id donec ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci. Suscipit adipiscing bibendum est ultricies integer quis auctor. Vel eros donec ac odio. <br><br>
 
 				Commodo sed egestas egestas fringilla phasellus faucibus scelerisque eleifend donec. Erat nam at lectus urna duis convallis. Semper feugiat nibh sed pulvinar. Ut eu sem integer vitae justo eget magna fermentum iaculis. Ac tortor vitae purus faucibus ornare suspendisse sed nisi. Sed arcu non odio euismod lacinia at quis risus. Rhoncus dolor purus non enim praesent elementum facilisis leo vel. Iaculis at erat pellentesque adipiscing commodo elit at.<br><br>
 
-				Etiam erat velit scelerisque in dictum non consectetur a. Amet consectetur adipiscing elit pellentesque. At imperdiet dui accumsan sit. Arcu dictum varius duis at consectetur lorem donec massa. Urna molestie at elementum eu facilisis sed odio morbi quis. Nunc lobortis mattis aliquam faucibus purus. Quisque id diam vel quam. Tortor at auctor urna nunc id cursus metus aliquam eleifend. Venenatis tellus in metus vulputate eu scelerisque felis imperdiet proin. 
+				Etiam erat velit scelerisque in dictum non consectetur a. Amet consectetur adipiscing elit pellentesque. At imperdiet dui accumsan sit. Arcu dictum varius duis at consectetur lorem donec massa. Urna molestie at elementum eu facilisis sed odio morbi quis. Nunc lobortis mattis aliquam faucibus purus. Quisque id diam vel quam. Tortor at auctor urna nunc id cursus metus aliquam eleifend. Venenatis tellus in metus vulputate eu scelerisque felis imperdiet proin.  -->
 
 				<!-- Tortor posuere ac ut consequat semper viverra nam. Aenean sed adipiscing diam donec adipiscing tristique risus. Tristique et egestas quis ipsum suspendisse. Ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue. Amet nisl suscipit adipiscing bibendum est ultricies integer. Adipiscing at in tellus integer. Aenean euismod elementum nisi quis eleifend quam adipiscing vitae. Amet risus nullam eget felis.<br><br>
 
@@ -123,7 +132,7 @@
 				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in. Duis at consectetur lorem donec massa sapien. Vel pharetra vel turpis nunc. Odio euismod lacinia at quis. Cras fermentum odio eu feugiat pretium. -->
 			</div>
 			<div class="article_reply">
-				<h3>Replies</h3><br>
+				<!-- <h3>Replies</h3><br>
 				<b>John Smith</b> on 12 January 2017<br><br>
 				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in.<br><br>
 				<hr style="height:1px;background-color:rgba(0,0,0,0.2);box-shadow: 0;border : 0;">
@@ -133,7 +142,7 @@
 				<hr style="height:1px;background-color:rgba(0,0,0,0.2);box-shadow: 0;border : 0;">
 				<br><br>
 				<b>Sam Davis</b> on 12 January 2017<br><br>
-				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in.
+				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in. -->
 			</div>
 		</article>
 			

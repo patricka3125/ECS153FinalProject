@@ -232,12 +232,12 @@ main {
 	align-items: center;
 	height:100px;
 	position: relative;
-	cursor:pointer;
-	transition:all 0.3s ease;
+	/*cursor:pointer;*/
+	justify-content: space-between;
 }
 .main_article:hover {
 	/*color: #bbb !important;*/
-	color:rgba(255,255,255,0.5);
+	/*color:rgba(255,255,255,0.5);*/
 }
 .main_article:last-of-type {
 	border-bottom:0;
@@ -256,6 +256,9 @@ main {
     margin-top: -31px;
     background-color: #434f6d;
     z-index: 5;
+
+    margin-top:-50.5px;
+    width: calc(100%);
 }
 .main_article_active::before {
 	transform: rotate(45deg);
@@ -275,7 +278,20 @@ main {
 	margin-right:15px;
 }
 .main_article_right {
-	
+	flex:1;
+	cursor:pointer;
+	transition:all 0.3s ease;
+}
+.main_article_delete {
+	cursor:pointer;
+	transition:all 0.3s ease;
+	color:rgba(255,255,255,0.5);
+}
+.main_article_delete:hover {
+	color:white;
+}
+.main_article_right:hover {
+	color:rgba(255,255,255,0.5);
 }
 .main_article_icon {
 	/*float:left;*/
@@ -303,10 +319,53 @@ article {
 }
 .article_post {
 	padding-bottom:30px;
-	border-bottom:1px solid rgba(0,0,0,0.2);
 	min-width: 100px;
 }
 .article_reply {
 	padding-top:30px;
 	min-width: 100px;
+}
+.article_reply_break {
+	height:1px;background-color:rgba(0,0,0,0.2);box-shadow: 0;border : 0;
+}
+.article_reply_break:last-of-type {
+	display:none;
+}
+.article_createreply {
+	/*border-top:1px solid rgba(0,0,0,0.2);*/
+}
+article > div:last-of-type {
+	border:0;
+}
+article > div {
+	border-bottom:1px solid rgba(0,0,0,0.2);
+}
+.article_createreply_content {
+	 height:98px;
+	 overflow-y:hidden;
+}
+.article_createreply_content {
+	transition: all 0s ease !important;
+	min-height: 100px;
+	resize: none;
+	width: 100%;
+	/*padding: 12px;*/
+	border: 1px solid rgba(0,0,0,0);
+	/*border-radius: 5px;*/
+	box-sizing: border-box;
+	/*margin-top: 6px;*/
+	/*margin-bottom: 16px;*/
+	/*margin-bottom:var(--margin-align);*/
+	/*resize: vertical;*/
+	/*border:0;*/
+	font-family: inherit;
+	/*font-size:0.85rem;*/
+	font-size: inherit;
+	padding:0;
+}
+.article_createreply_content:hover {
+	border-bottom: 1px solid #f2f2f2;
+}
+.article_createreply_content:active {
+	border-bottom: 1px solid #cccccc;
 }

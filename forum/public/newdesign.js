@@ -1,3 +1,16 @@
+// auto-height textarea
+// from https://stackoverflow.com/a/25621277
+var tx = document.getElementsByTagName('textarea');
+for (var i = 0; i < tx.length; i++) {
+  tx[i].setAttribute('style', 'height:' + (tx[i].scrollHeight) + 'px;overflow-y:hidden;');
+  tx[i].addEventListener("input", OnInput, false);
+}
+
+function OnInput() {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+}
+
 function createElement( str ) {
 	// https://stackoverflow.com/questions/3662821/how-to-correctly-use-innerhtml-to-create-an-element-with-possible-children-fro
     var frag = document.createDocumentFragment();
@@ -19,16 +32,27 @@ function createCORSRequest(method, url) {
 
 function newarticle_editor() {
 	let main_articles = document.getElementById("main_articles")
-	let articlecreator_htmlstring = `
+	let main_articlecreator_htmlstring = `
 	<div class="main_article">
 		<div class="main_article_left"><i class="material-icons main_article_icon">edit</i></div>
 		<div class="main_article_right">
 			<span class="main_article_title">New Article Draft</span><br>
 			<span class="main_article_author">By Username</span>
 		</div>
-	</div>`
-	let articlecreator = createElement(articlecreator_htmlstring);
-	main_articles.prepend(articlecreator);
+	</div>`;
+	let main_articlecreator = createElement(main_articlecreator_htmlstring);
+	main_articles.prepend(main_articlecreator);
+
+	let article = document.getElementById("article");
+	article.innerHTML = `
+	<input type="text" id="new_post_title" name="new_title" placeholder="New Post Title">
+	<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:98px;overflow-y:hidden;"></textarea>
+	`;
+	// let main_articlecreator = createElement(main_articlecreator_htmlstring);
+	// article.prepend(main_articlecreator);
+
+	// <input type="text" id="new_post_title" name="new_title" placeholder="New Post Title">
+	// <textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:98px;overflow-y:hidden;"></textarea>
 }
 
 function getcategories(categoryid) {
@@ -62,15 +86,15 @@ function getcategories(categoryid) {
 				<span class="nav_link_text" onclick="switchcategory(`+object[i].category_id+`);">
 					`+object[i].title+`<br>? Posts
 				</span>
-			</div>`
+			</div>`;
 			let newcategory = createElement(newcategory_htmlstring);
 			nav_links.appendChild(newcategory);
 
 
-// object[i].category_id, object[i].title, object[i].public 
+// object[i].category_id, object[i].title.slice(1, -1), object[i].public 
 		}
 
-		getposts(currentcategory);
+		getposts(currentcategory, "default");
 
 		console.log(object);
 	};
@@ -134,7 +158,7 @@ function deletecategory(categoryid) {
 	xhr.send();
 }
 
-function getposts(categoryid) {
+function getposts(categoryid, postid) {
 	let url = "/getcategoryposts?categoryid=" + categoryid;
 
 	let xhr = createCORSRequest('GET', url);
@@ -148,42 +172,33 @@ function getposts(categoryid) {
 
 		let main_articles = document.getElementById("main_articles");
 		main_articles.innerHTML = "";
-		
+
 		for (let i = 0; i < object.length; i++) {
-
-			// let newpost = document.createElement('div');
-			// newpost.id = "post_" + object[i].category_id + "_" + object[i].post_id;
-			// newpost.innerHTML = "<input type='button' value='delete post' style='float:right;' onclick='deletepost("+object[i].category_id+","+object[i].post_id+")'>"+"<input type='button' value='edit post' style='float:right;text-decoration:line-through;'>"+"<h3>" + object[i].title + "</h3> (id: " +object[i].category_id+ "_" + object[i].post_id + ", author: "+ object[i].user_id+", "+object[i].date_created+" )" + "<br>" + object[i].content;
-
-			// let replycreator = document.createElement('div');
-			// replycreator.innerHTML = '<input type="text" id="reply_content_'+object[i].category_id+"_"+object[i].post_id+'" placeholder="content"><input type="button" onclick="newreply('+object[i].category_id+","+object[i].post_id+')" value="create reply">';
-			// newpost.appendChild(replycreator);
-
-			// document.getElementById('category_' + categoryid).appendChild(newpost);
-			// updatereplies(categoryid, object[i].post_id);
 
 			let activepostclass = "";
 			let workingpostid = object[i].category_id + "_" + object[i].post_id;
-			if (currentpost == "default" && i == 0) {
+			if (postid == "default" && i == 0) {
 				activepostclass = "main_article_active";
-				currentpost = workingpostid;
+				currentpost = object[i].post_id;
 				getpost(object[i].category_id, object[i].post_id);
-				// document.getElementById("main_title").textContent = object[i].title;
+				// document.getElementById("main_title").textContent = object[i].title.slice(1, -1);
 			}
-			else if (currentpost == workingpostid) {
+			// else if (currentpost == workingpostid) {
+			else if (postid == object[i].post_id) {
 				activepostclass = "main_article_active";
-				currentpost = workingpostid;
+				currentpost = object[i].post_id;
 				getpost(object[i].category_id, object[i].post_id);
-				// document.getElementById("main_title").textContent = object[i].title;
+				// document.getElementById("main_title").textContent = object[i].title.slice(1, -1);
 			}
 			let newpost_htmlstring = `
 			<div class="main_article `+activepostclass+`" id="post_`+workingpostid+`">
 				<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
-				<div class="main_article_right">
-					<span class="main_article_title">`+object[i].title+`</span><br>
+				<div class="main_article_right" onclick="switchpost(`+object[i].category_id+`,`+object[i].post_id+`);">
+					<span class="main_article_title">`+object[i].title.slice(1, -1)+`</span><br>
 					<span class="main_article_author">By `+object[i].author+`. ?? replies.</span>
 				</div>
-			</div>`
+				<i class="material-icons main_article_delete" onclick="deletepost(`+object[i].category_id+`,`+object[i].post_id+`);">close</i>
+			</div>`;
 			let newpost = createElement(newpost_htmlstring);
 			main_articles.appendChild(newpost);
 		}
@@ -195,7 +210,98 @@ function getposts(categoryid) {
 }
 
 function getpost(categoryid, postid) {
+	let url = "/getpost?categoryid=" + categoryid + "&postid=" + postid;
 
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {
+	  	throw new Error('CORS not supported');
+	}
+
+  	// Load some functions into response handlers.
+	xhr.onload = function() {
+		let responseStr = xhr.responseText;  // get the JSON string 
+		let object = JSON.parse(responseStr);  // turn it into an object
+		console.log(object);
+
+		let article = document.getElementById("article");
+		article.innerHTML = "";
+
+		// create new post
+		let newpost_htmlstring = `
+			<div class="article_post">
+				<h3>`+object[0].title.slice(1, -1)+`</h3>
+				By <b>`+object[0].author+`</b> on `+object[0].date_created.slice(1, -1)+`<br><br>
+				`+object[0].content.slice(1, -1)+`
+			</div>
+			`;
+
+
+		let newpost = createElement(newpost_htmlstring);
+		article.appendChild(newpost);
+		object = object[1];
+
+		if (object.length > 0) {
+			let replies_htmlstring = `
+			<div class="article_reply" id="article_reply">
+				<h3>Replies</h3><br>
+			</div>
+			`
+			let replies = createElement(replies_htmlstring);
+			article.appendChild(replies);
+
+			let article_reply = document.getElementById("article_reply");
+			for (let i = 0; i < object.length; i++) {
+				// replies
+				
+
+				// create new post
+				let reply_htmlstring = `
+					<b>`+object[i].author+`</b> on `+object[i].date_created.slice(1, -1)+`<br><br>
+					`+object[i].content.slice(1, -1)+`<br><br>
+					<hr class="article_reply_break"><br><br>`;
+
+				let newreply = createElement(reply_htmlstring);
+				article_reply.appendChild(newreply);
+			}
+		}
+
+		
+
+		let createreply_htmlstring = `
+			<div class="article_createreply">
+				<br><h3>Create Reply</h3>
+				<textarea class="article_createreply_content" id="article_createreply_content" name="new_content" placeholder="Write something.."></textarea>
+			</div>
+			
+		`
+		let createreply = createElement(createreply_htmlstring);
+		article.appendChild(createreply);
+
+	};
+
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+
+function switchpost(categoryid, postid) {
+	getposts(categoryid, postid);
+}
+function deletepost(categoryid, postid) {
+	let url = "/deletepost?categoryid=" + categoryid + "&postid=" + postid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		console.log(xhr.responseText, xhr.status);
+		if(postid == currentpost) {
+			currentpost = "default";
+		}
+		getposts(categoryid, currentpost);
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
 }
 
 getcategories("default");
