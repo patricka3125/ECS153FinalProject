@@ -2,10 +2,11 @@
 Jonathan Hsu, Patrick Liao, Zaprin Ignatiev  
 5/22/2019
 
-## Summary
-This week we implemented completed basic forum functionality. This includes setting up the server, database, writing the frontend and connecting it to the design. This week, we're going to continue implementing authentication and access control. We haven't encountered any issues so far. 
+## Jonathan Hsu
+This week I implemented completed basic forum functionality. This includes setting up the server, database, writing the frontend and connecting it to the design. This week, I'm going to continue implementing authentication and access control. I haven't encountered any issues so far. 
 
-Patrick: This week I implemented the user database and ability to sign up. Currently
+## Patrick Liao
+This week I implemented the user database and ability to sign up. Currently
 have the sign up page and server add user functions done. This week I will 
 focus on finishing user authentication, including user login, logout function
 and assigning user priorities. User authentication is taking longer than expected

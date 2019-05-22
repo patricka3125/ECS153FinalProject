@@ -13,25 +13,41 @@
 
 	<nav>
 		<div class="nav_logo">mango</div>
-		<div class="nav_links">
-			<span class="nav_link" onclick="">News<br>64 Posts</span>
-			<span class="nav_link" onclick="">Culture<br>64 Posts</span>
-			<span class="nav_link nav_link_active" onclick="">Works<br>64 Posts</span>
-			<span class="nav_link" onclick="">General<br>64 Posts</span>
-			<span class="nav_link" onclick="">Projects<br>64 Posts</span>
-			<span class="nav_link" onclick="">Support<br>64 Posts</span>
+		<div class="nav_links" id="nav_links">
+			<!-- <div class="nav_link">
+				<i class="material-icons nav_delete" onclick="deletecategory(1);">close</i>
+				<span class="nav_link_text" onclick="switchcategory(1);">
+					News<br>64 Posts
+				</span>
+			</div>
+			<div class="nav_link nav_link_active" onclick="">
+				<i class="material-icons nav_delete">close</i>
+				<span class="nav_link_text">
+					News<br>64 Posts
+				</span>
+			</div>
+			<div class="nav_link" onclick="">
+				<i class="material-icons nav_delete">close</i>
+				<span class="nav_link_text">
+					News<br>64 Posts
+				</span>
+			</div> -->
+		</div>
+		<div class="nav_create">
+			<input class="nav_create_input" type="text" placeholder="New Category" id="nav_create_input">
+			<span class="nav_create_button" onclick="createcategory()">+</span>
 		</div>
 	</nav>
 
 	<section class="rightside">
 		<main>
 			<div class="main_top">
-				<span class="main_title">Works</span>
+				<span class="main_title" id="main_title">Works</span>
 				<span class="main_search">Search Threads</span>
-				<span class="main_newbutton">New Post</span>
+				<span class="main_newbutton" onclick="newarticle_editor();">+</span>
 			</div>
-			<div class="main_articles">
-				<div class="main_article">
+			<div class="main_articles" id="main_articles">
+				<!-- <div class="main_article">
 					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
 					<div class="main_article_right">
 						<span class="main_article_title">Article 1</span><br>
@@ -86,7 +102,7 @@
 						<span class="main_article_title">Article 1</span><br>
 						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</main>
 
@@ -122,6 +138,7 @@
 		</article>
 			
 	</div>
+	<script src="newdesign.js"></script>
 
 </body>
 </html>
