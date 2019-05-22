@@ -2,14 +2,8 @@
 Jonathan Hsu, Patrick Liao, Zaprin Ignatiev  
 5/22/2019
 
-## Jonathan Hsu
-This week I implemented completed basic forum functionality. This includes setting up the server, database, writing the frontend and connecting it to the design. This week, I'm going to help out with implementing authentication and access control. I haven't encountered any issues so far. 
-
-## Patrick Liao
-WIP
-
-## Zaprin Ignatiev
-WIP
+## Summary
+This week we implemented completed basic forum functionality. This includes setting up the server, database, writing the frontend and connecting it to the design. This week, we're going to continue implementing authentication and access control. We haven't encountered any issues so far. 
 
 ## Trello
 https://trello.com/invite/b/PERFlN4o/4427563571f6da7cd31ba08c2198e5ad/ecs153-project
