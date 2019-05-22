@@ -178,6 +178,12 @@ function getposts(categoryid, postid) {
 
 		let main_articles = document.getElementById("main_articles");
 		main_articles.innerHTML = "";
+		document.getElementById("article").innerHTML = "";
+
+		if(object.length == 0) {
+			main_articles.innerHTML = "No Posts";
+			document.getElementById("article").innerHTML = "";
+		}
 
 		// for (let i = 0; i < object.length; i++) {
 		for (let i = object.length-1; i >= 0; i--) {
