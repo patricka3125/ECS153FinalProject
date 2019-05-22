@@ -1,0 +1,41 @@
+<!doctype HTML>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Forum</title>
+	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+</head>
+
+<body>
+
+	<!-- <header>
+		<h2>Forum</h2>
+	</header> -->
+	<nav>
+		<span class="logo">Mango Forum</span>
+		<span class="navlinks">
+			<span class="navlink" onclick="window.location.href = 'repliesdemo.html';">Replies Demo Page</span>
+			<!-- <span class="navlink">Settings</span>
+			<span class="navlink">Login</span> -->
+		</span>
+	</nav>
+
+	<main id="main">
+        <div class="form">
+			<div class="bar">Sign up:</div>
+			<!-- <label for="new_title">New Post Title</label> -->
+			<input type="text" id="new_username" name="username" placeholder="username">
+
+			<!-- <label for="new_content">Content</label> -->
+			<input type="text" id="new_password" name="password" placeholder="password">
+
+			<input type="submit" id="sign_up__button" value="Sign Up" onclick="sendnewpost();">
+		</div>	
+			
+	</main>
+
+	<script src="script.js"></script>
+</body>
+</html>

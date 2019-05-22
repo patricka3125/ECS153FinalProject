@@ -25,6 +25,10 @@ const db = new sqlite3.Database(dbFileName, (err) => {
         db.run("CREATE TABLE IF NOT EXISTS replies(category_id INTEGER, post_id INTEGER, reply_id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date_created DATETIME, content TEXT)", creationerror(err)); 
         // roles: category_id, user_id, role
         db.run("CREATE TABLE IF NOT EXISTS roles(category_id INTEGER, user_id INTEGER, role INTEGER)"); 
+
+        // users: id, user_id, password
+        db.run("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + "username VARCHAR(45), password VARCHAR(45))", creationerror(err));
     }
 });
 
@@ -347,6 +351,22 @@ function gettable( req, res, next) {
     }
 }
 
+function create_user(req,res,next) {
+    let qobj = req.query;
+    if(qobj.username != undefined && qobj.password != undefined) {
+        let sqlquery = "INSERT INTO users (username,password)" 
+            + "VALUES(?,?)";
+
+        let myresult = "sign up success!";
+
+        db.run(sqlquery, [qobj.username, qobj.password]);
+        res.send(myresult);
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
 // ===============================================================================
 
 function fileNotFound(req, res) {
@@ -379,6 +399,7 @@ app.get('/getpost', getpost);
 app.post('/newreply', newreply);
 app.post('/editreply', editreply);
 app.get('/deletereply', deletereply);
+app.get('/create_user', create_user);
 
 app.get('/gettable', gettable);
 
