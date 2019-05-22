@@ -31,9 +31,14 @@ function createCORSRequest(method, url) {
 }
 
 function newarticle_editor() {
+	let activepost = document.getElementsByClassName("main_article_active");
+	for (let i = 0; i < activepost.length; i++) {
+		activepost[i].className = "main_article";
+	}
+
 	let main_articles = document.getElementById("main_articles")
 	let main_articlecreator_htmlstring = `
-	<div class="main_article">
+	<div class="main_article main_article_active">
 		<div class="main_article_left"><i class="material-icons main_article_icon">edit</i></div>
 		<div class="main_article_right">
 			<span class="main_article_title">New Article Draft</span><br>
@@ -45,8 +50,8 @@ function newarticle_editor() {
 
 	let article = document.getElementById("article");
 	article.innerHTML = `
-	<input type="text" id="new_post_title" name="new_title" placeholder="New Post Title">
-	<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:98px;overflow-y:hidden;"></textarea>
+	<input type="text" class="new_post_title" id="new_post_title" name="new_title" placeholder="New Post Title">
+	<textarea class="new_post_content" id="new_post_content" name="new_content" placeholder="Write something.."></textarea>
 	`;
 	// let main_articlecreator = createElement(main_articlecreator_htmlstring);
 	// article.prepend(main_articlecreator);

@@ -310,6 +310,41 @@ main {
 .main_article_author {
 
 }
+.new_post_title, .new_post_content {
+	transition: all 0s ease !important;
+	min-height: 100px;
+	resize: none;
+	width: 100%;
+	/*padding: 12px;*/
+	border: 1px solid rgba(0,0,0,0);
+	/*border-radius: 5px;*/
+	box-sizing: border-box;
+	/*margin-top: 6px;*/
+	/*margin-bottom: 16px;*/
+	/*margin-bottom:var(--margin-align);*/
+	/*resize: vertical;*/
+	/*border:0;*/
+	font-family: inherit;
+	/*font-size:0.85rem;*/
+	font-size: inherit;
+	padding:0;
+}
+.new_post_title {
+	font-size:1.2rem;
+	font-weight:bold;
+	margin-bottom: 20px;
+	padding-bottom:5px;
+}
+.new_post_content {
+	/*min-height: 100px;*/
+}
+.new_post_title:hover, .new_post_content:hover {
+	border-bottom: 1px solid #f2f2f2;
+}
+
+.new_post_title:active, .new_post_content:active {
+	border-bottom: 1px solid #cccccc;
+}
 article {
 	flex: 1;
 	overflow-y: auto;
