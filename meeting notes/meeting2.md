@@ -23,4 +23,8 @@ https://github.com/patricka3125/ECS153FinalProject/commit/a8cec823b7aacbafaaf4f1
 https://github.com/patricka3125/ECS153FinalProject/commit/5ccdb1ec837f3346e82010dc7e47d6a9892fe76e
 
 - Frontend with Design:  
-TBD
+Categories: https://github.com/patricka3125/ECS153FinalProject/commit/246568fa2c467c56f3329ecc48c63e12a1ad9042
+Posts: https://github.com/patricka3125/ECS153FinalProject/commit/2d7afed8288715d65d38e759493ecb0387cc3b54
+Replies: https://github.com/patricka3125/ECS153FinalProject/commit/7e65527040a56dbc4f0e689c7684f24fc1aeab92
+
+
