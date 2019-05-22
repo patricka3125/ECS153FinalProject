@@ -15,11 +15,11 @@ WIP
 https://trello.com/invite/b/PERFlN4o/4427563571f6da7cd31ba08c2198e5ad/ecs153-project
 
 ## Commits
-- Backend: 
+- Backend:  
 https://github.com/patricka3125/ECS153FinalProject/commit/a8cec823b7aacbafaaf4f13993d235912731846e
 
-- Frontend Tester: 
+- Frontend Tester:  
 https://github.com/patricka3125/ECS153FinalProject/commit/5ccdb1ec837f3346e82010dc7e47d6a9892fe76e
 
-- Frontend with Design: 
+- Frontend with Design:  
 TBD
