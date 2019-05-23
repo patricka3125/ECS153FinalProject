@@ -84,6 +84,7 @@ function creationerror(err) {
 
 // ===============================================================================
 
+console.log("HELLO WORLD")
 function newcategory (req, res, next) {
     // Create new category
     // /newcategory?categoryname=___&public=___

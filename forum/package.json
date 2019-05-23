@@ -4,8 +4,10 @@
   "description": "Forum for ECS 153 Project",
   "main": "server.js",
   "dependencies": {
+    "accesscontrol": "^2.2.1",
     "body-parser": "^1.19.0",
     "express": "^4.16.4",
+    "passport": "^0.4.0",
     "sqlite3": "^4.0.8",
     "sqlstring": "^2.3.1"
   },
