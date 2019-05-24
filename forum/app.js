@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
+const AccessControl = require('accesscontrol');
 const port = 8080;
 
 // https://www.techiediaries.com/node-sqlite-crud/
@@ -37,6 +38,53 @@ function creationerror(err) {
         console.log(err);
     }
 }
+
+//DEFINING THE ACCESS CONTROL BASIC STRUCTURE, WITHOUT PRIVATE
+
+const ac = new AccessControl();
+//the list of orders could be defined inside a data base as an array, and we can only read it in
+// can be found on the last example https://www.npmjs.com/package/accesscontrol#expressjs-example
+ac.grant('guest')     // seting up our model (no private yet)
+		.readAny('category') // the same as .readAny('category', ['*'])
+    .readAny('post')
+  .grant('user')                   
+    .extend('guest')                 
+    .createOwn('post', ['title'])  // explicitly defined attributes
+		.createOwn('category')
+    .deleteOwn('post')
+		.deleteOwn('category')
+		.updateOwn('post')
+		//.updateOwn('category') // I am not sure if categories can be updated
+	.grant('admin')
+		.extend('user')
+		.deleteAny('post')
+		.deleteAny('category');
+		
+ 
+let permission = ac.can('user').createOwn('post');
+console.log(permission.granted);    // —> true
+console.log(permission.attributes); // —> ['title'] (all attributes)
+
+permission = ac.can('user').createOwn('category');
+console.log(permission.granted);    // —> true
+console.log(permission.attributes); // —> ['*'] (returns the * by definition)
+ 
+let role1 = 'admin';
+permission = ac.can(role1).updateAny('post');
+console.log(permission.granted);    // —> false, because not defined
+
+permission = ac.can(role1).createOwn('guest');
+console.log(permission.granted);    // —> false, because not access
+
+	//We can use access control inside every function the following way:
+	//function newCategory(req, res, next) {
+	// const current_user = (get user role);
+	// const permission = ac.can(current_user).createOwn('category');
+	// if(persmision) ...
+	// else{print "persmision denied"}
+	//}
+	
+
 
 // // https://www.techiediaries.com/node-sqlite-crud/
 // function readsql() {
@@ -84,7 +132,7 @@ function creationerror(err) {
 
 // ===============================================================================
 
-console.log("HELLO WORLD")
+
 function newcategory (req, res, next) {
     // Create new category
     // /newcategory?categoryname=___&public=___
