@@ -33,7 +33,7 @@ const db = new sqlite3.Database(dbFileName, (err) => {
 
         // users: id, user_id, password, role
         db.run("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + "username VARCHAR(45), password VARCHAR(45), role INTEGER)", creationerror(err));
+            + "username VARCHAR(45) UNIQUE, password VARCHAR(45), role INTEGER)", creationerror(err));
     }
 });
 
@@ -136,6 +136,29 @@ console.log(permission.granted);    // —> false, because not access
 
 // ===============================================================================
 
+
+// ========== PASSPORT (Authentication) CODE ==================================
+
+passport.use(new local_strategy(
+    function(username, password, done) {
+        // find username from db
+        users.find_user(username, db, function(err,user) {
+            if(err) { done(err); }
+            if(!user) {
+                return done(null, false, { message: 'Incorrect username.' });
+            }
+
+            // match password
+            if(!users.valid_password(username, password,db)) {
+                return done(null, false, { message: 'Incorrect password.' });
+            }
+
+            return done(null, user);
+        });
+    })
+);
+
+// ============================================================================
 
 function newcategory (req, res, next) {
     // Create new category
