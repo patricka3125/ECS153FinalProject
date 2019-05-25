@@ -27,7 +27,7 @@ const db = new sqlite3.Database(dbFileName, (err) => {
         // roles: category_id, user_id, role
         db.run("CREATE TABLE IF NOT EXISTS roles(category_id INTEGER, user_id INTEGER, role INTEGER)"); 
 
-        // users: id, user_id, password
+        // users: id, user_id, password, role
         db.run("CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,"
             + "username VARCHAR(45), password VARCHAR(45), role INTEGER)", creationerror(err));
     }
@@ -408,7 +408,8 @@ function create_user(req,res,next) {
 
         let myresult = "sign up success!";
 
-        db.run(sqlquery, [qobj.username, qobj.password, qobj.role]);
+        // for now, default role as 1
+        db.run(sqlquery, [qobj.username, qobj.password, 1]);
         res.send(myresult);
     }
     else {
@@ -448,7 +449,7 @@ app.get('/getpost', getpost);
 app.post('/newreply', newreply);
 app.post('/editreply', editreply);
 app.get('/deletereply', deletereply);
-app.get('/create_user', create_user);
+app.post('/create_user', create_user);
 
 app.get('/gettable', gettable);
 

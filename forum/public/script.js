@@ -221,17 +221,4 @@ function clearposts() {
 	xhr.send();
 }
 
-/*function sign_up() {
-    let url = "/create_user";
-    let username = document.getElementById("new_username");
-    let password = document.getElementById("new_password");
-
-    // checking if browser does CORS
-	let xhr = createCORSRequest('GET', url);
-	if (!xhr) {
-	  	throw new Error('CORS not supported');
-	}
-
-}*/
-
 getposts();
