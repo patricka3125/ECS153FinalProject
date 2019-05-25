@@ -7,6 +7,10 @@ const port = 8080;
 const sqlite3 = require("sqlite3").verbose();  // use sqlite
 const fs = require("fs");
 
+const users = require('./users');
+const passport = require('passport');
+const local_strategy = require('passport-local').Strategy; //passport local strategy
+
 const dbFileName = "mango.db";
 
 const SqlString = require("sqlstring");
@@ -403,17 +407,18 @@ function gettable( req, res, next) {
 function create_user(req,res,next) {
     let qobj = req.query;
     if(qobj.username != undefined && qobj.password != undefined) {
-        let sqlquery = "INSERT INTO users (username,password, role)" 
-            + "VALUES(?,?,?)";
-
-        let myresult = "sign up success!";
-
-        // for now, default role as 1
-        db.run(sqlquery, [qobj.username, qobj.password, 1]);
-        res.send(myresult);
+        users.add_user(qobj.username,qobj.password,db, 
+            function(err) {
+                if(err) { console.log("Error, sign up attempt failed"); }
+                else {
+                    console.log("Signed up new user: " + qobj.username);
+                    res.send("Sign-Up successful");
+                }
+            }
+        );
     }
     else {
-        console.log("Undefined");
+        console.log("Username or password undefined");
         next();
     }
 }
@@ -434,6 +439,7 @@ app.use(express.static('public'));  // can I find a static file?
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(passport.initialize());
 // app.get('/getposts', getpostsHandler);
 // app.post('/newpost', newpostHandler);
 // app.get('/clearposts', clearpostsHandler);
@@ -450,6 +456,10 @@ app.post('/newreply', newreply);
 app.post('/editreply', editreply);
 app.get('/deletereply', deletereply);
 app.post('/create_user', create_user);
+app.post('/login', passport.authenticate('local', { successRedirect: '/',
+                                                    failureRedirect: '/login',
+                                                    failureFlash: false })
+);
 
 app.get('/gettable', gettable);
 
