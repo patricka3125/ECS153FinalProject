@@ -31,6 +31,11 @@ function createCORSRequest(method, url) {
 }
 
 function newarticle_editor() {
+	// check if there's already an editor
+	if(document.getElementById("main_articleeditor")) {
+		return;
+	}
+	// reset active articles
 	let activepost = document.getElementsByClassName("main_article_active");
 	for (let i = 0; i < activepost.length; i++) {
 		activepost[i].className = "main_article";
@@ -38,7 +43,7 @@ function newarticle_editor() {
 
 	let main_articles = document.getElementById("main_articles")
 	let main_articlecreator_htmlstring = `
-	<div class="main_article main_article_active">
+	<div class="main_article main_article_active" id="main_articleeditor">
 		<div class="main_article_left"><i class="material-icons main_article_icon">edit</i></div>
 		<div class="main_article_right">
 			<span class="main_article_title">New Article Draft</span><br>
@@ -61,6 +66,30 @@ function newarticle_editor() {
 	// <textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:98px;overflow-y:hidden;"></textarea>
 }
 
+function toggle_categorysettings(categoryid) {
+	main = document.getElementById("main");
+	main_settings = document.getElementById("main_settings");
+	if (main.classList.toggle("main_large")) {
+		// main_large
+		main_settings.classList.toggle("main_settings_large");
+	}
+	else {
+		// main_small
+		main_settings.classList.toggle("main_settings_large");
+		
+	}
+	// document.getElementById("main").style.flex = "100";
+}
+function hide_categorysettings(categoryid) {
+	main = document.getElementById("main");
+	if(main.classList.contains("main_large")) {
+		toggle_categorysettings(1);
+	}
+}
+function get_categorysettings(categoryid) {
+
+}
+
 function getcategories(categoryid) {
 	let url = "/getcategorynames";
 	let xhr = createCORSRequest('GET', url);
@@ -74,17 +103,25 @@ function getcategories(categoryid) {
 		let nav_links = document.getElementById("nav_links");
 		nav_links.innerHTML = "";
 
+		hide_categorysettings(0);
+
 		for (let i = 0; i < object.length; i++) {
 			let activecategoryclass = "";
 			if (categoryid == "default" && i == 0) {
 				activecategoryclass = "nav_link_active";
 				currentcategory = object[i].category_id;
-				document.getElementById("main_title").textContent = object[i].title;
+				let main_title = document.getElementById("main_title");
+				main_title.textContent = object[i].title;
+				let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
+				main_title.appendChild(category_settings);
 			}
 			else if (categoryid == object[i].category_id) {
 				activecategoryclass = "nav_link_active";
 				currentcategory = object[i].category_id;
-				document.getElementById("main_title").textContent = object[i].title;
+				let main_title = document.getElementById("main_title");
+				main_title.textContent = object[i].title;
+				let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
+				main_title.appendChild(category_settings);
 			}
 			let newcategory_htmlstring = `
 			<div class="nav_link `+activecategoryclass+`" id="category_`+object[i].category_id+`">

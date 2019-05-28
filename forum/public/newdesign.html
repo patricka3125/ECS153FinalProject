@@ -43,11 +43,76 @@
 	</nav>
 
 	<section class="rightside">
-		<main>
+		<main id="main">
 			<div class="main_top">
 				<span class="main_title" id="main_title">Works</span>
 				<span class="main_search">Search Threads</span>
 				<span class="main_newbutton" onclick="newarticle_editor();">+</span>
+			</div>
+			<div class="main_settings" id="main_settings">
+				<span class="main_settings_title">Category Settings</span>
+				<i class="material-icons category_settings" style="float:right" onclick="toggle_categorysettings(1);">close</i>
+				<br>
+				<br>
+				Visibility: <br>
+				<input type="radio" name="gender" value="1" checked="checked"> Public<br>
+				<input type="radio" name="gender" value="0"> Private<br>
+
+				<br>
+				Name: <br>
+				<input type="text" placeholder="Name" value="CategoryName"><br>
+
+				<br>
+				Delete Category: <br>
+				<input type="submit" value="Delete Category"><br>
+
+				<br>
+				Users:
+				<table style="border:1px solid white">
+				  <tr>
+				    <th class="tg-0lax">Username</th>
+				    <th class="tg-0lax">Type</th>
+				    <th class="tg-0lax">Manage</th>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Jonathan</td>
+				    <td class="tg-0lax">Owner</td>
+				    <td class="tg-0lax"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Daniel</td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1" selected="selected">Moderator</option>
+						  <option value="2">User</option>
+						</select>
+					</td>
+				    <td class="tg-0lax"><input type="button" value="Remove User"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Angela</td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1">Moderator</option>
+						  <option value="2" selected="selected">User</option>
+						</select>
+				    </td>
+				    <td class="tg-0lax"><input type="button" value="Remove User"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax"><input type="text" placeholder="Add User" value=""></td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1">Moderator</option>
+						  <option value="2" selected="selected">User</option>
+						</select>
+				    </td>
+				    <td class="tg-0lax"><input type="button" value="Add User"></td>
+				  </tr>
+				</table>
+
+				<br>
+				<input type="submit" value="Save Settings">
 			</div>
 			<div class="main_articles" id="main_articles">
 
