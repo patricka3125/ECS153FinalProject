@@ -136,6 +136,7 @@ console.log(permission.granted);    // —> false, because not access
 
 // ===============================================================================
 
+let tempuserid = 2;
 
 // ========== PASSPORT (Authentication) CODE ==================================
 
@@ -409,6 +410,103 @@ function deletereply (req, res, next) {
     }
 }
 
+function getuserroles(userid, cb) {
+    let sqlquery = "SELECT * FROM roles WHERE user_id=" + userid;
+
+    db.all(sqlquery, function(err, rows) {
+        cb(err, rows);
+    });
+}
+
+function getuserprofile (req, res, next) {
+    // could be handled by the session cookie, but don't. 
+    // need to check if user is able to get info on userid
+    // getuserprofile?userid=___
+    // username, role, [owned_categories], [moderator_categories], [user_categories]
+
+    let qobj = req.query;
+    if (qobj.userid != undefined) {
+        console.log("finding user " + qobj.userid);
+
+        users.find_userid(qobj.userid, db, function(err, row) {
+            // console.log(err, row);
+            if(err) {
+                console.log("finding user error");
+                res.send(null);
+            }
+            else if(row == null) {
+                console.log("no users found")
+                res.send(null);
+            }
+            else {
+                // don't send the password! 
+                // get roles
+
+                getuserroles(qobj.userid, function(roles_err, roles_rows) {
+                    if(roles_err) {
+                        console.log("finding roles error");
+                        res.send(null);
+                    }
+                    else {
+                        let owned_categories = [];
+                        let moderator_categories = [];
+                        let user_categories = [];
+
+                        for(let i = 0; i < roles_rows.length; i++) {
+                            if (roles_rows[i].role == 1) {// owner
+                                owned_categories.append(roles_rows[i].category_id);
+                            }
+                            else if (roles_rows[i].role == 2) {// moderator
+                                moderator_categories.append(roles_rows[i].category_id);
+                            }
+                            else if (roles_rows[i].role == 3) {// user
+                                user_categories.append(roles_rows[i].category_id);
+                            }
+                        }
+                        let myresult = {"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
+                        console.log("sending: ", myresult);
+                        res.send(myresult);
+                    }
+                });
+            }
+        });
+
+        
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+
+}
+
+function getauthor( req, res, next ) {
+    // getauthor?userid=___
+    let qobj = req.query;
+    if (qobj.userid != undefined) {
+        console.log("finding user " + qobj.userid);
+
+        users.find_userid(qobj.userid, db, function(err, row) {
+            // console.log(err, row);
+            if(err) {
+                console.log("finding user error");
+                res.send(null);
+            }
+            else if(row == null) {
+                console.log("no users found")
+                res.send(null);
+            }
+            else {
+                res.send(row);
+            }
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
 function gettable( req, res, next) {
     // get table - for debugging only
     // /gettable?table=___
@@ -471,13 +569,19 @@ app.get('/newcategory', newcategory);
 app.get('/deletecategory', deletecategory);
 app.get('/getcategorynames', getcategorynames);
 app.get('/getcategoryposts', getcategoryposts);
+
 app.post('/newpost', newpost);
 app.post('/editpost', editpost);
 app.get('/deletepost', deletepost);
 app.get('/getpost', getpost);
+
 app.post('/newreply', newreply);
 app.post('/editreply', editreply);
 app.get('/deletereply', deletereply);
+
+app.get('/getuserprofile', getuserprofile);
+app.get('/getauthor', getauthor);
+
 app.post('/create_user', create_user);
 app.post('/login', passport.authenticate('local', { successRedirect: '/',
                                                     failureRedirect: '/login',
