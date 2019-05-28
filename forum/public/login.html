@@ -23,19 +23,16 @@
 	</nav>
 
 	<main id="main">
-        <div class="form">
-			<div class="bar">Sign up:</div>
+        <form action="/login" method="post">
+			<div class="bar">Log in:</div>
 			<!-- <label for="new_title">New Post Title</label> -->
-			<input type="text" id="new_username" name="username" placeholder="username">
+			<input type="text" name="username" placeholder="username">
 
 			<!-- <label for="new_content">Content</label> -->
-			<input type="password" id="new_password" name="password" placeholder="password">
+			<input type="password" name="password" placeholder="password">
 
-			<input type="submit" id="sign_up_button" value="Sign Up" onclick="sign_up();">
-		</div>	
-			
+			<input type="submit" value="Log In">
+		</form>		
 	</main>
-
-	<script src="user_client.js"></script>
 </body>
 </html>

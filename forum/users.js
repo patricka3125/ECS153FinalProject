@@ -11,7 +11,7 @@ exports.find_user = function(username,db,cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
     // TODO: vulnerable to SQL injection
-    let sqlquery = "SELECT * FROM users WHERE username=" + username;
+    let sqlquery = "SELECT * FROM users WHERE username='" + username + "'";
 
     db.all(sqlquery, function(err, rows) {
         if(err) { cb(err,null); }
@@ -42,15 +42,15 @@ exports.find_userid = function(userid,db,cb) {
 exports.valid_password = function(username,password,db) {
     if(!db) { cb(new Error('DB does not exist')); }
 
-    let sqlquery = "SELECT * from users where username=" + username
-                   + "AND password=" + password;
+    let sqlquery = "SELECT * FROM users WHERE username='" + username
+                   + "' AND password='" + password + "'";
+
+    var is_valid = true;
 
     db.all(sqlquery, function(err, rows) {
-        if(err) { return false; }
-        else if(rows.length < 1) {
-            return false;
-        }else {
-            return true;
-        }
+        if(err) { is_valid = false; }
+        if(rows.length < 1) { is_valid = false; }
     });
+
+    return is_valid;
 }

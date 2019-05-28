@@ -6,6 +6,7 @@ const port = 8080;
 // https://www.techiediaries.com/node-sqlite-crud/
 const sqlite3 = require("sqlite3").verbose();  // use sqlite
 const fs = require("fs");
+const flash = require("connect-flash");
 
 const users = require('./users');
 const passport = require('passport');
@@ -560,6 +561,7 @@ app.use(express.static('public'));  // can I find a static file?
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(flash());
 app.use(passport.initialize());
 // app.get('/getposts', getpostsHandler);
 // app.post('/newpost', newpostHandler);
@@ -583,8 +585,9 @@ app.get('/getuserprofile', getuserprofile);
 app.get('/getauthor', getauthor);
 
 app.post('/create_user', create_user);
+// TODO: sucessRedirect to user profile
 app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login',
+                                                    failureRedirect: '/',
                                                     failureFlash: false })
 );
 
