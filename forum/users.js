@@ -3,7 +3,7 @@ exports.add_user = function(username,password,db,cb) {
 
     let sqlquery = "INSERT INTO users (username, password, role) VALUES(?,?,?)";
 
-    db.run(sqlquery, [username,password,1]); // for now, default role as 1
+    db.run(sqlquery, [username,password,0]); // for now, default role as 0 (non-admin)
     cb(null);
 }
 
@@ -15,7 +15,23 @@ exports.find_user = function(username,db,cb) {
 
     db.all(sqlquery, function(err, rows) {
         if(err) { cb(err,null); }
-        if(rows.length < 1) {
+        else if(rows.length < 1) {
+            cb(null,null);
+        }else {
+            cb(null,rows[0]);
+        }
+    });
+}
+
+exports.find_userid = function(userid,db,cb) {
+    if(!db) { cb(new Error('DB does not exist')); }
+
+    // TODO: vulnerable to SQL injection
+    let sqlquery = "SELECT id, username, role FROM users WHERE id=" + userid;
+
+    db.all(sqlquery, function(err, rows) {
+        if(err) { cb(err,null); }
+        else if(rows.length < 1) {
             cb(null,null);
         }else {
             cb(null,rows[0]);
@@ -31,7 +47,7 @@ exports.valid_password = function(username,password,db) {
 
     db.all(sqlquery, function(err, rows) {
         if(err) { return false; }
-        if(rows.length < 1) {
+        else if(rows.length < 1) {
             return false;
         }else {
             return true;
