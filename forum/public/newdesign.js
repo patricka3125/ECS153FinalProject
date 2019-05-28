@@ -1,3 +1,6 @@
+// temp current user
+let tempuserid = 2;
+
 // auto-height textarea
 // from https://stackoverflow.com/a/25621277
 var tx = document.getElementsByTagName('textarea');
@@ -90,7 +93,75 @@ function get_categorysettings(categoryid) {
 
 }
 
+// AUTHORS
+
+function getuserprofile(userid, cb) {
+	let url = "/getuserprofile?userid=" + userid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+
+  	// Load some functions into response handlers.
+	xhr.onload = function() {
+		if(xhr.responseText == "") {
+			cb(null);
+		}
+		else {
+			cb(JSON.parse(xhr.responseText));
+		}
+	};
+
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+
+let globalfoundauthornames = {};
+
+function getauthornames() {
+	let authors = document.getElementsByClassName("author");
+	for (let i = 0; i < authors.length; i++) {
+		let currentauthorid = authors[i].getAttribute('data-authorname');
+		if (globalfoundauthornames.hasOwnProperty(currentauthorid)) {
+			authors[i].textContent = globalfoundauthornames[currentauthorid];
+		}
+		else {
+			getauthorname(currentauthorid, function(authorname) {
+				globalfoundauthornames[currentauthorid] = authorname;
+				authors[i].textContent = authorname;
+			});
+		}
+	}
+}
+
+function getauthorname(userid, cb) {
+	let url = "/getauthor?userid=" + userid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+
+  	// Load some functions into response handlers.
+	xhr.onload = function() {
+		// console.log(xhr.responseText)
+		if(xhr.responseText == "") {
+			cb(null);
+		}
+		else {
+			cb(JSON.parse(xhr.responseText).username);
+		}
+	};
+
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+
+// END AUTHORS
+
+// BASIC FUNCTIONALITY
+
 function getcategories(categoryid) {
+	// show create category
+	if (global_userprofile != null) {
+		document.getElementById("nav_create").classList.remove("hidden");
+	}
+
 	let url = "/getcategorynames";
 	let xhr = createCORSRequest('GET', url);
 	if (!xhr) { throw new Error('CORS not supported');}
@@ -99,6 +170,8 @@ function getcategories(categoryid) {
 	xhr.onload = function() {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let object = JSON.parse(responseStr);  // turn it into an object
+
+		global_categorypermissions = object;
 
 		let nav_links = document.getElementById("nav_links");
 		nav_links.innerHTML = "";
@@ -112,34 +185,62 @@ function getcategories(categoryid) {
 				currentcategory = object[i].category_id;
 				let main_title = document.getElementById("main_title");
 				main_title.textContent = object[i].title;
-				let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
-				main_title.appendChild(category_settings);
+
+				// can category settings
+				if (global_userprofile != null && (
+					global_userprofile["owned_categories"].includes(object[i].category_id) ||
+					global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+					// global_userprofile["user_categories"].includes(object[i].category_id) ||
+					global_userprofile["role"] == 1)) {
+					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
+					main_title.appendChild(category_settings);
+				}
 			}
 			else if (categoryid == object[i].category_id) {
 				activecategoryclass = "nav_link_active";
 				currentcategory = object[i].category_id;
 				let main_title = document.getElementById("main_title");
 				main_title.textContent = object[i].title;
-				let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
-				main_title.appendChild(category_settings);
+				// can category settings
+				if (global_userprofile != null && (
+					global_userprofile["owned_categories"].includes(object[i].category_id) ||
+					global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+					// global_userprofile["user_categories"].includes(object[i].category_id) ||
+					global_userprofile["role"] == 1)) {
+					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
+					main_title.appendChild(category_settings);
+				}
+			}
+			// accesscontrol: category deleteable?
+			let candelete = "hidden"; // cannot delete
+			if (global_userprofile != null && (
+				global_userprofile["owned_categories"].includes(object[i].category_id) ||
+				global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+				global_userprofile["user_categories"].includes(object[i].category_id) ||
+				global_userprofile["role"] == 1)) {
+				candelete = ""; // can delete
 			}
 			let newcategory_htmlstring = `
 			<div class="nav_link `+activecategoryclass+`" id="category_`+object[i].category_id+`">
-				<i class="material-icons nav_delete" onclick="deletecategory(`+object[i].category_id+`);">close</i>
-				<span class="nav_link_text" onclick="switchcategory(`+object[i].category_id+`);">
-					`+object[i].title+`<br>? Posts
+				<i class="material-icons nav_delete `+candelete+`" onclick="deletecategory(`+object[i].category_id+`);" id="category_delete_`+object[i].category_id+`">close</i>
+				<span class="nav_link_text" onclick="switchcategory(`+object[i].category_id+`);" id="category_title_`+object[i].category_id+`">
+					`+object[i].title+`<!--<br>? Posts-->
 				</span>
 			</div>`;
 			let newcategory = createElement(newcategory_htmlstring);
-			nav_links.appendChild(newcategory);
 
+			
+
+			nav_links.appendChild(newcategory);
 
 // object[i].category_id, object[i].title.slice(1, -1), object[i].public 
 		}
 
+		
+
 		getposts(currentcategory, "default");
 
-		console.log(object);
+		console.log("categories:", object);
 	};
 
 	xhr.onerror = function() { alert('error'); };
@@ -211,7 +312,7 @@ function getposts(categoryid, postid) {
 	xhr.onload = function() {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let object = JSON.parse(responseStr);  // turn it into an object
-		console.log(object);
+		console.log("posts:", object);
 
 		let main_articles = document.getElementById("main_articles");
 		main_articles.innerHTML = "";
@@ -245,7 +346,7 @@ function getposts(categoryid, postid) {
 				<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
 				<div class="main_article_right" onclick="switchpost(`+object[i].category_id+`,`+object[i].post_id+`);">
 					<span class="main_article_title">`+object[i].title.slice(1, -1)+`</span><br>
-					<span class="main_article_author">By `+object[i].author+`. ?? replies.</span>
+					<span class="main_article_author">By `+`<span class="author" data-authorname="`+object[i].user_id+`"></span>`+`<!--. ?? replies.--></span>
 				</div>
 				<i class="material-icons main_article_delete" onclick="deletepost(`+object[i].category_id+`,`+object[i].post_id+`);">close</i>
 			</div>`;
@@ -271,7 +372,7 @@ function getpost(categoryid, postid) {
 	xhr.onload = function() {
 		let responseStr = xhr.responseText;  // get the JSON string 
 		let object = JSON.parse(responseStr);  // turn it into an object
-		console.log(object);
+		console.log("postreplies: ", object);
 
 		let article = document.getElementById("article");
 		article.innerHTML = "";
@@ -280,7 +381,7 @@ function getpost(categoryid, postid) {
 		let newpost_htmlstring = `
 			<div class="article_post">
 				<h3>`+object[0].title.slice(1, -1)+`</h3>
-				By <b>`+object[0].author+`</b> on `+object[0].date_created.slice(1, -1)+`<br><br>
+				By <b>`+`<span class="author" data-authorname="`+object[0].user_id+`"></span>`+`</b> on `+object[0].date_created.slice(1, -1)+`<br><br>
 				`+object[0].content.slice(1, -1)+`
 			</div>
 			`;
@@ -306,7 +407,7 @@ function getpost(categoryid, postid) {
 
 				// create new post
 				let reply_htmlstring = `
-					By <b>`+object[i].author+`</b> on `+object[i].date_created.slice(1, -1)+`<br><br>
+					By <b>`+`<span class="author" data-authorname="`+object[i].user_id+`"></span>`+`</b> on `+object[i].date_created.slice(1, -1)+`<br><br>
 					`+object[i].content.slice(1, -1)+`<br><br>
 					<hr class="article_reply_break"><br><br>`;
 
@@ -327,6 +428,8 @@ function getpost(categoryid, postid) {
 		`
 		let createreply = createElement(createreply_htmlstring);
 		article.appendChild(createreply);
+
+		getauthornames();
 
 	};
 
@@ -411,7 +514,66 @@ function createreply(categoryid, postid) {
 	xhr.send(JSON.stringify(mydata));
 }
 
-getcategories("default");
+// END BASIC FUNCTIONALITY
+
+
+// ACCESS CONTROL
+// username, admin, [owned_categories], [moderator_categories], [user_categories]
+
+// function load_categoryoperations(userprofile) {
+// 	console.log(userprofile);
+// 	// view categories
+// 	categories = document.getElementsByClassName("nav_link_text");
+// 	for (let i = 0; i < categories.length; i++) {
+// 		let category_id = categories[i].id.slice(-1);
+
+// 		// view category
+// 		if ()
+// 		if (userprofile.owned_categories.includes(category_id) ||
+// 			userprofile.moderator_categories.includes(category_id) ||
+// 			userprofile.user_categories.includes(category_id) ||
+// 			userprofile.role == 1) {
+// 			document.getElementById("category_" + category_id).classList.remove("hidden");
+// 		}
+
+// 		// delete category
+// 		if (userprofile.owned_categories.includes(category_id) ||
+// 			// userprofile.moderator_categories.includes(category_id) ||
+// 			// userprofile.user_categories.includes(category_id) ||
+// 			userprofile.role == 1) {
+// 			document.getElementById("category_delete_" + category_id).classList.remove("hidden");
+// 		}
+// 	}
+
+// 	// delete category
+
+// 	// create category
+
+// 	// category settings
+// }
+
+// END ACCESS CONTROL
+
+let global_categorypermissions = null;
+let global_userprofile = null;
+
+// first get userprofile
+getuserprofile(tempuserid, function(userprofile) {
+	if(userprofile != null) {
+		document.getElementById("user_loginbutton").textContent = "Logged in as " + userprofile.username;
+	}
+
+	// load:
+	// delete category, create category, category settings, view categories
+	// load_categoryoperations(userprofile);
+
+	global_userprofile = userprofile;
+	getcategories("default");
+	// create post, delete post (view is handled by category)
+	// create reply, delete reply (view is handled by category)
+
+});
+
 let currentcategory = "default";
 let currentpost = "default";
 
