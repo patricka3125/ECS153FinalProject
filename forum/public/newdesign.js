@@ -186,7 +186,7 @@ function getcategories(categoryid) {
 				let main_title = document.getElementById("main_title");
 				main_title.textContent = object[i].title;
 
-				// can category settings
+				// accesscontrol: category settings
 				if (global_userprofile != null && (
 					global_userprofile["owned_categories"].includes(object[i].category_id) ||
 					global_userprofile["moderator_categories"].includes(object[i].category_id) ||
@@ -196,7 +196,7 @@ function getcategories(categoryid) {
 					main_title.appendChild(category_settings);
 				}
 
-				// can create post button
+				// accesscontrol: create post button
 				if (global_userprofile != null) {
 					document.getElementById("main_newbutton").classList.remove("hidden");
 				}
@@ -206,7 +206,7 @@ function getcategories(categoryid) {
 				currentcategory = object[i].category_id;
 				let main_title = document.getElementById("main_title");
 				main_title.textContent = object[i].title;
-				// can category settings
+				// accesscontrol: category settings
 				if (global_userprofile != null && (
 					global_userprofile["owned_categories"].includes(object[i].category_id) ||
 					global_userprofile["moderator_categories"].includes(object[i].category_id) ||
@@ -216,7 +216,7 @@ function getcategories(categoryid) {
 					main_title.appendChild(category_settings);
 				}
 
-				// can create post button
+				// accesscontrol: create post button
 				if (global_userprofile != null) {
 					document.getElementById("main_newbutton").classList.remove("hidden");
 				}
@@ -351,6 +351,17 @@ function getposts(categoryid, postid) {
 				getpost(object[i].category_id, object[i].post_id);
 				// document.getElementById("main_title").textContent = object[i].title.slice(1, -1);
 			}
+
+			// accesscontrol: post deleteable?
+			let candelete = "hidden"; // cannot delete
+			if (global_userprofile != null && (
+				global_userprofile["owned_categories"].includes(object[i].category_id) ||
+				global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+				global_userprofile["id"] == object[i].user_id ||
+				global_userprofile["role"] == 1)) {
+				candelete = ""; // can delete
+			}
+
 			let newpost_htmlstring = `
 			<div class="main_article `+activepostclass+`" id="post_`+workingpostid+`">
 				<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
@@ -358,7 +369,7 @@ function getposts(categoryid, postid) {
 					<span class="main_article_title">`+object[i].title.slice(1, -1)+`</span><br>
 					<span class="main_article_author">By `+`<span class="author" data-authorname="`+object[i].user_id+`"></span>`+`<!--. ?? replies.--></span>
 				</div>
-				<i class="material-icons main_article_delete" onclick="deletepost(`+object[i].category_id+`,`+object[i].post_id+`);">close</i>
+				<i class="material-icons main_article_delete `+candelete+`" onclick="deletepost(`+object[i].category_id+`,`+object[i].post_id+`);">close</i>
 			</div>`;
 			let newpost = createElement(newpost_htmlstring);
 			main_articles.appendChild(newpost);

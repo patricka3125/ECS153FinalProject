@@ -463,7 +463,7 @@ function getuserprofile (req, res, next) {
                                 user_categories.push(roles_rows[i].category_id);
                             }
                         }
-                        let myresult = {"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
+                        let myresult = {"id": row.id,"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
                         console.log("sending: ", myresult);
                         res.send(myresult);
                     }
