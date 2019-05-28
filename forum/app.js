@@ -454,13 +454,13 @@ function getuserprofile (req, res, next) {
 
                         for(let i = 0; i < roles_rows.length; i++) {
                             if (roles_rows[i].role == 1) {// owner
-                                owned_categories.append(roles_rows[i].category_id);
+                                owned_categories.push(roles_rows[i].category_id);
                             }
                             else if (roles_rows[i].role == 2) {// moderator
-                                moderator_categories.append(roles_rows[i].category_id);
+                                moderator_categories.push(roles_rows[i].category_id);
                             }
                             else if (roles_rows[i].role == 3) {// user
-                                user_categories.append(roles_rows[i].category_id);
+                                user_categories.push(roles_rows[i].category_id);
                             }
                         }
                         let myresult = {"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};

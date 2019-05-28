@@ -50,7 +50,7 @@ function newarticle_editor() {
 		<div class="main_article_left"><i class="material-icons main_article_icon">edit</i></div>
 		<div class="main_article_right">
 			<span class="main_article_title">New Article Draft</span><br>
-			<span class="main_article_author">By Username</span>
+			<span class="main_article_author">By `+global_userprofile["username"]+`</span>
 		</div>
 	</div>`;
 	let main_articlecreator = createElement(main_articlecreator_htmlstring);
@@ -195,6 +195,11 @@ function getcategories(categoryid) {
 					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
 					main_title.appendChild(category_settings);
 				}
+
+				// can create post button
+				if (global_userprofile != null) {
+					document.getElementById("main_newbutton").classList.remove("hidden");
+				}
 			}
 			else if (categoryid == object[i].category_id) {
 				activecategoryclass = "nav_link_active";
@@ -209,6 +214,11 @@ function getcategories(categoryid) {
 					global_userprofile["role"] == 1)) {
 					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
 					main_title.appendChild(category_settings);
+				}
+
+				// can create post button
+				if (global_userprofile != null) {
+					document.getElementById("main_newbutton").classList.remove("hidden");
 				}
 			}
 			// accesscontrol: category deleteable?

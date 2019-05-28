@@ -226,7 +226,7 @@ main {
 	/*overflow-y:hidden;*/
 }
 .main_large {
-	/*flex:100;*/
+	flex:100;
 }
 .main_top {
 	display:flex;
