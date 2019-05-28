@@ -11,6 +11,7 @@ const flash = require("connect-flash");
 const users = require('./users');
 const passport = require('passport');
 const local_strategy = require('passport-local').Strategy; //passport local strategy
+const session = require('express-session')({ secret: 'mango', resave: false, saveUninitialized: false });
 
 const dbFileName = "mango.db";
 
@@ -159,6 +160,17 @@ passport.use(new local_strategy(
         });
     })
 );
+
+passport.serializeUser(function(user, cb) {
+    cb(null, user.id);
+});
+
+passport.deserializeUser(function(id, cb) {
+    users.find_userid(id, db, function(err, user) {
+        if(err) { return cb(err); }
+        cb(null, user);
+    });
+});
 
 // ============================================================================
 
@@ -563,6 +575,7 @@ app.use(bodyParser.json());
 
 app.use(flash());
 app.use(passport.initialize());
+app.use(passport.session());
 // app.get('/getposts', getpostsHandler);
 // app.post('/newpost', newpostHandler);
 // app.get('/clearposts', clearpostsHandler);
@@ -585,7 +598,7 @@ app.get('/getuserprofile', getuserprofile);
 app.get('/getauthor', getauthor);
 
 app.post('/create_user', create_user);
-// TODO: sucessRedirect to user profile
+// TODO: sucessRedirect to user profile, failureRedirect to login page
 app.post('/login', passport.authenticate('local', { successRedirect: '/',
                                                     failureRedirect: '/',
                                                     failureFlash: false })
