@@ -9,6 +9,8 @@ function updatetables() {
 	updatetable("categories");
 	updatetable("posts");
 	updatetable("replies");
+	updatetable("users");
+	updatetable("roles");
 }
 
 function updatetable(tablename) {
