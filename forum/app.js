@@ -47,26 +47,141 @@ function creationerror(err) {
 
 //DEFINING THE ACCESS CONTROL BASIC STRUCTURE, WITHOUT PRIVATE
 
-const ac = new AccessControl();
+
 //the list of orders could be defined inside a data base as an array, and we can only read it in
 // can be found on the last example https://www.npmjs.com/package/accesscontrol#expressjs-example
-ac.grant('guest')     // seting up our model (no private yet)
-		.readAny('category') // the same as .readAny('category', ['*'])
-    .readAny('post')
-  .grant('user')                   
-    .extend('guest')                 
-    .createOwn('post', ['title'])  // explicitly defined attributes
-		.createOwn('category')
-    .deleteOwn('post')
-		.deleteOwn('category')
-		.updateOwn('post')
-		//.updateOwn('category') // I am not sure if categories can be updated
-	.grant('admin')
-		.extend('user')
-		.deleteAny('post')
-		.deleteAny('category');
-		
- 
+const ac = new AccessControl();
+ac.grant('user')                
+        .createOwn('post') // explicitly defined attributes
+        .updateOwn('post')
+        .deleteOwn('post')
+        .createOwn('reply')
+        .updateOwn('reply')
+        .deleteOwn('reply')
+        .createOwn('category')
+    .grant('moderator')
+        //ONLY ONE MODERATOR PER CATEGORY!
+        .extend('user')
+        .deleteAny('post')
+        .deleteOwn('category')
+        .updateOwn('category') 
+        .deleteAny('reply')
+    .grant('admin')
+        .extend('moderator')
+        .deleteAny('category');
+
+
+//ac.lock().setGrants({}); // lock the roles for security   
+        
+//const permission = (req.user.name === req.params.username)
+//   ? ac.can(role).updateOwn('photo')
+//   : ac.can(role).updateAny('photo');
+//
+//console.log(permission.granted);
+
+//function findRole(category_id, qobj)
+//{
+    // check if user is admin, if it is retrun admin
+    // if not check it is a moderator, or member(user) of a private function
+//}
+
+//usr id (GLOBAL), userInfo(db), categoryInfo(db), 
+function hasAccess(operation, element, category_id) // 
+{
+    //need to get user role!!! (ONLY ONCE)
+    //findRole, checks the users role in the category
+    user_role = 'guest' // use this temporary
+    let category_type = 1
+
+    if(operation === 'read')
+    {
+        if (category_type === 1) //if public
+            return true;
+        else if(category_type === 0)// if private
+        {
+            if(user_role === 'guest')
+                return false;
+            else
+            {
+                //findRole, checks the users role in the category
+                //create a function to check roles( will be needed for other authentication as well)
+                return false; //for now
+            }
+        }
+    }
+    else if(operation === 'create')
+    {
+        if (user_role === 'guest')
+            return false;
+        // can create category,post,reply
+        if (element === 'category')
+        {
+            const permission = ac.can(user_role).createOwn('category');
+            // need to update data base in createNewCateory()
+            return premission.granted;
+        }
+        else // element is either post or reply
+        {
+            if (categoy_type === 1)
+                return true;
+            else if(category_type === 0)// if private
+            {
+                //findRole, checks the users role in the category
+                //create a function to check roles( will be needed for other authentication as well)
+                
+                return false; //for now
+            }
+        }
+    }
+    else if(operation === 'update')
+    {
+        if(user_role === 'guest')
+            return false;
+        if(element === 'category')
+        { 
+            //findRole, checks the users role in the category
+            const permission = (user_role === 'moderator')
+                   ? ac.can(user_role).updateOwn('category') // if moderator then update own
+                   : ac.can(user_role).updateAny('category'); // if not moderator check if admin
+            return permission.granted;
+        }
+        else // element is either post or reply
+        {
+            if (categoy_type === 1)
+                return true;
+            //instead of retrun true, I need to check if the user owns the comment or reply...
+            else if(category_type === 0)// if private
+            {
+                //findRole, checks the users role in the category
+                //create a function to check roles( will be needed for other authentication as well)
+                    const permission = (user_role === 'admin')
+                   ? ac.can(user_role).updateAny('post') //if admin can update any posts
+                   : ac.can(user_role).updateOwn('post'); // if not only own
+
+                return permission.granted;
+                return false; //for now
+            }
+        }
+    }
+    else if(operation === 'delete')
+    {
+        if(user_role === 'guest')
+            return false;
+        return false;
+    }
+    return false; // by default 
+}
+
+let testFucn = hasAccess('update','post', 1)
+if (testFucn)
+{
+    console.log("Access Granted")
+}
+else
+    console.log("Access Denied")
+
+        
+
 let permission = ac.can('user').createOwn('post');
 console.log(permission.granted);    // —> true
 console.log(permission.attributes); // —> ['title'] (all attributes)
@@ -81,15 +196,6 @@ console.log(permission.granted);    // —> false, because not defined
 
 permission = ac.can(role1).createOwn('guest');
 console.log(permission.granted);    // —> false, because not access
-
-	//We can use access control inside every function the following way:
-	//function newCategory(req, res, next) {
-	// const current_user = (get user role);
-	// const permission = ac.can(current_user).createOwn('category');
-	// if(persmision) ...
-	// else{print "persmision denied"}
-	//}
-	
 
 
 // // https://www.techiediaries.com/node-sqlite-crud/
