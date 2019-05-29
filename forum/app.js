@@ -143,6 +143,7 @@ function hasAccess(operation, element, role, category_id, type) //
             }
         }
     }
+    //updates can only be made by the person owning the element
     else if(operation === 'update')
     {
         if(user_role === 'guest')
@@ -164,12 +165,66 @@ function hasAccess(operation, element, role, category_id, type) //
             {
                 if(user_role === 'member')
                     user_role = 'user';
+                 //1 check for ownership
+                //create function to check for post ownership
+                ownsPost = true // for now true ownsPost()
+                if(!ownsPost)
+                    return false;
+                else
+                {
+                    const permission = ac.can(user_role).updateOwn('post');
+                    return permission.granted;
+                }
+            }
+            else if(category_type === 0)// if private
+            {
+                if(user_role === 'user')
+                    return false;
+                else
+                {
+                    if(user_role === 'member')
+                        user_role = 'user'
+                    //1 check for ownership
+                    //create function to check for post ownership
+                    ownsPost = true // for now true ownsPost()
+                    if(!ownsPost)
+                        return false;
+                    else
+                    {
+                        const permission = ac.can(user_role).updateOwn('post');
+                        return permission.granted;
+                    }
+                }
+            }
+        }
+    }
+    else if(operation === 'delete')
+    {
+        if(user_role === 'guest')
+            return false;
+        if(element === 'category')
+        { 
+            if(user_role === 'member')
+                user_role = 'user';
+            //findRole, checks the users role in the category
+            const permission = (user_role === 'moderator')
+                   ? ac.can(user_role).deleteOwn('category') // if moderator then update own
+                   : ac.can(user_role).deleteAny('category'); // if not moderator check if admin
+            //NEED TO UPDATE USER TO MODERATOR on categ. creation
+            return permission.granted;
+        }
+        else // element is either post or reply
+        {
+            if (category_type === 1)
+            {
+                if(user_role === 'member')
+                    user_role = 'user';
                 //1 check for ownership
                 //create function to check for post ownership
                 ownsPost = true // for now true ownsPost()
                 const permission = (ownsPost)
-                ?ac.can(user_role).updateOwn('post')
-                :ac.can(user_role).updateAny('post');
+                ?ac.can(user_role).deleteOwn('post')
+                :ac.can(user_role).deleteAny('post');
                 return permission.granted;
             }
             //instead of retrun true, I need to check if the user owns the comment or reply...
@@ -185,18 +240,13 @@ function hasAccess(operation, element, role, category_id, type) //
                     //create function to check for post ownership
                     ownsPost = true // for now true ownsPost()
                     const permission = (ownsPost)
-                    ?ac.can(user_role).updateOwn('post')
-                    :ac.can(user_role).updateAny('post');
+                    ?ac.can(user_role).deleteOwn('post')
+                    :ac.can(user_role).deleteAny('post');
                     return permission.granted;
                 }
             }
         }
-    }
-    else if(operation === 'delete')
-    {
-        if(user_role === 'guest')
-            return false;
-        return false;
+
     }
     return false; // by default 
 }
