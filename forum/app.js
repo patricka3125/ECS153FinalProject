@@ -68,10 +68,7 @@ ac.grant('user')
         .deleteAny('reply')
     .grant('admin')
         .extend('moderator')
-        .deleteAny('category');
-
-
-//ac.lock().setGrants({}); // lock the roles for security   
+        .deleteAny('category'); 
         
 //const permission = (req.user.name === req.params.username)
 //   ? ac.can(role).updateOwn('photo')
@@ -79,11 +76,11 @@ ac.grant('user')
 //
 //console.log(permission.granted);
 
-//function findRole(category_id, qobj)
-//{
+//category_od, obj
+function findRole()
+{
     // check if user is admin, if it is retrun admin
     // if not check it is a moderator, or member(user) of a private function
-
 
     //if user_id not in usr database, return guest
     //if user_id in usr data base and is admin, return admin
@@ -91,7 +88,39 @@ ac.grant('user')
     //if user_id in both usr and category databasem return memeber
     //      a memebr has the same privs. as user inside the private 
     //if user_id inside category and is a moderator, return moderator
-//}
+
+    //Check if user is in the database
+    let user_role = 'none';
+    let isAdmin = 0;
+    console.log("Read data from users");
+    user_id = 1
+    let sqlstr = "SELECT * FROM users WHERE id =" + user_id
+    db.all(sqlstr, function(err, rows) {
+          if (err) {
+            throw err;
+          }
+        rows.forEach((row) => {
+            console.log(row.id ,row.role);
+            isAdmin = row.role;
+        });
+    }); 
+
+    if(isAdmin)
+        return 'admin';
+    return user_role;
+}
+
+/*
+    console.log("Read data from users");
+    db.all("SELECT id,role FROM users", function(err, rows) {
+          if (err) {
+            throw err;
+          }
+        rows.forEach((row) => {
+            console.log(row.id ,row.role);
+        });
+    }); 
+    */
 
 
 //usr id (GLOBAL), userInfo(db), categoryInfo(db), 
@@ -250,32 +279,19 @@ function hasAccess(operation, element, role, category_id, type) //
     }
     return false; // by default 
 }
-
-//operation, element, role,category_id, type
-let testFucn = hasAccess('update','post','member', 1, 1)
-if (testFucn)
+//IMPORTANT NEED TO SET UP TABLE BEFORE ACCESS CONTROL
+let bate = findRole();
+console.log(bate);
+//                   operation, element, role, category_id, type
+let temp = hasAccess('read', 'post', 'guest', 1, 1);
+if(temp)
 {
-    console.log("Access Granted")
+    console.log("ACCESS GRANTED!");
 }
 else
-    console.log("Access Denied")
-
-        
-
-let permission = ac.can('user').createOwn('post');
-console.log(permission.granted);    // —> true
-console.log(permission.attributes); // —> ['title'] (all attributes)
-
-permission = ac.can('user').createOwn('category');
-console.log(permission.granted);    // —> true
-console.log(permission.attributes); // —> ['*'] (returns the * by definition)
- 
-let role1 = 'admin';
-permission = ac.can(role1).updateAny('post');
-console.log(permission.granted);    // —> false, because not defined
-
-permission = ac.can(role1).createOwn('guest');
-console.log(permission.granted);    // —> false, because not access
+{
+    console.log("ACCESS DENIED!");
+}
 
 
 // // https://www.techiediaries.com/node-sqlite-crud/
