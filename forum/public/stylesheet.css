@@ -444,6 +444,17 @@ article {
 .article_reply_break:last-of-type {
 	display:none;
 }
+.article_reply_delete {
+	cursor:pointer;
+	transition:all 0.3s ease;
+	color:#434f6d;
+	opacity:0.3;
+	float:right;
+	margin-top:-5px;
+}
+.article_reply_delete:hover {
+	opacity:1;
+}
 .article_createreply {
 	/*border-top:1px solid rgba(0,0,0,0.2);*/
 }

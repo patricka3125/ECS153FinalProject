@@ -425,9 +425,18 @@ function getpost(categoryid, postid) {
 			for (let i = 0; i < object.length; i++) {
 				// replies
 				
+				// accesscontrol: post deleteable?
+				let candelete = "hidden"; // cannot delete
+				if (global_userprofile != null && (
+					global_userprofile["owned_categories"].includes(object[i].category_id) ||
+					global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+					global_userprofile["id"] == object[i].user_id ||
+					global_userprofile["role"] == 1)) {
+					candelete = ""; // can delete
+				}
 
-				// create new post
 				let reply_htmlstring = `
+					<i class="material-icons article_reply_delete `+candelete+`" onclick="deletereply(`+object[i].category_id+`,`+object[i].post_id+`,`+object[i].reply_id+`);">close</i>
 					By <b>`+`<span class="author" data-authorname="`+object[i].user_id+`"></span>`+`</b> on `+new Date(object[0].date_created.slice(1, -1)).toString().slice(4,21)+`<br><br>
 					`+object[i].content.slice(1, -1)+`<br><br>
 					<hr class="article_reply_break"><br><br>`;
@@ -533,6 +542,24 @@ function createreply(categoryid, postid) {
 	// Actually send request to server
 	console.log(JSON.stringify(mydata));
 	xhr.send(JSON.stringify(mydata));
+}
+
+function deletereply(categoryid, postid, replyid) {
+	let url = "/deletereply?categoryid=" + categoryid + "&postid=" + postid + "&replyid=" + replyid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+	xhr.setRequestHeader('Content-type', 'application/json');
+
+	xhr.onload = function() {
+		console.log(xhr.responseText, xhr.status);
+		// if(postid == currentpost) {
+		// 	currentpost = "default";
+		// }
+		getposts(categoryid, currentpost);
+	};
+
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
 }
 
 // END BASIC FUNCTIONALITY
