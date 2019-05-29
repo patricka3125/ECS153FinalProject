@@ -83,15 +83,27 @@ ac.grant('user')
 //{
     // check if user is admin, if it is retrun admin
     // if not check it is a moderator, or member(user) of a private function
+
+
+    //if user_id not in usr database, return guest
+    //if user_id in usr data base and is admin, return admin
+    //if user_id in usr data base but not in category database, return user
+    //if user_id in both usr and category databasem return memeber
+    //      a memebr has the same privs. as user inside the private 
+    //if user_id inside category and is a moderator, return moderator
 //}
 
+
 //usr id (GLOBAL), userInfo(db), categoryInfo(db), 
-function hasAccess(operation, element, category_id) // 
+//FINAL USER ROLES: guest, user, moderator, admin
+function hasAccess(operation, element, role, category_id, type) // 
 {
     //need to get user role!!! (ONLY ONCE)
+    //inside user role, if user is not listed inside categories data
+    // base he is treated like a guest to the category!!!! 
     //findRole, checks the users role in the category
-    user_role = 'guest' // use this temporary
-    let category_type = 1
+    user_role = role //'guest' // use this temporary
+    let category_type = type
 
     if(operation === 'read')
     {
@@ -99,23 +111,19 @@ function hasAccess(operation, element, category_id) //
             return true;
         else if(category_type === 0)// if private
         {
-            if(user_role === 'guest')
+            if(user_role === 'guest' || user_role === 'user') 
                 return false;
-            else
-            {
-                //findRole, checks the users role in the category
-                //create a function to check roles( will be needed for other authentication as well)
-                return false; //for now
-            }
+            else // if member, moderator or admin
+                return true;
         }
     }
     else if(operation === 'create')
     {
         if (user_role === 'guest')
             return false;
-        // can create category,post,reply
         if (element === 'category')
         {
+            //category doesn't exist, so 'member' hold not be possible
             const permission = ac.can(user_role).createOwn('category');
             // need to update data base in createNewCateory()
             return premission.granted;
@@ -123,13 +131,15 @@ function hasAccess(operation, element, category_id) //
         else // element is either post or reply
         {
             if (categoy_type === 1)
-                return true;
+                return true; //user,member,moderator and admin can create posts,replies
             else if(category_type === 0)// if private
             {
-                //findRole, checks the users role in the category
-                //create a function to check roles( will be needed for other authentication as well)
-                
-                return false; //for now
+                if(user_role === 'user') 
+                    return false;
+                else // member, moderator, admin (all can create posts and replies)
+                {
+                    return true;
+                }
             }
         }
     }
@@ -139,27 +149,46 @@ function hasAccess(operation, element, category_id) //
             return false;
         if(element === 'category')
         { 
+            if(user_role === 'member')
+                user_role = 'user';
             //findRole, checks the users role in the category
             const permission = (user_role === 'moderator')
                    ? ac.can(user_role).updateOwn('category') // if moderator then update own
                    : ac.can(user_role).updateAny('category'); // if not moderator check if admin
+            //NEED TO UPDATE USER TO MODERATOR on categ. creation
             return permission.granted;
         }
         else // element is either post or reply
         {
-            if (categoy_type === 1)
-                return true;
+            if (category_type === 1)
+            {
+                if(user_role === 'member')
+                    user_role = 'user';
+                //1 check for ownership
+                //create function to check for post ownership
+                ownsPost = true // for now true ownsPost()
+                const permission = (ownsPost)
+                ?ac.can(user_role).updateOwn('post')
+                :ac.can(user_role).updateAny('post');
+                return permission.granted;
+            }
             //instead of retrun true, I need to check if the user owns the comment or reply...
             else if(category_type === 0)// if private
             {
-                //findRole, checks the users role in the category
-                //create a function to check roles( will be needed for other authentication as well)
-                    const permission = (user_role === 'admin')
-                   ? ac.can(user_role).updateAny('post') //if admin can update any posts
-                   : ac.can(user_role).updateOwn('post'); // if not only own
-
-                return permission.granted;
-                return false; //for now
+                if(user_role === 'user')
+                    return false;
+                else
+                {
+                    if(user_role === 'member')
+                        user_role = 'user'
+                    //1 check for ownership
+                    //create function to check for post ownership
+                    ownsPost = true // for now true ownsPost()
+                    const permission = (ownsPost)
+                    ?ac.can(user_role).updateOwn('post')
+                    :ac.can(user_role).updateAny('post');
+                    return permission.granted;
+                }
             }
         }
     }
@@ -172,7 +201,8 @@ function hasAccess(operation, element, category_id) //
     return false; // by default 
 }
 
-let testFucn = hasAccess('update','post', 1)
+//operation, element, role,category_id, type
+let testFucn = hasAccess('update','post','member', 1, 1)
 if (testFucn)
 {
     console.log("Access Granted")
