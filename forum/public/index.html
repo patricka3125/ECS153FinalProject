@@ -1,120 +1,226 @@
 <!doctype HTML>
 <html>
-
+<!-- inspired by https://dribbble.com/shots/2478998-Forum-Concept -->
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width">
 	<title>Forum</title>
 	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
 <body>
 
-	<!-- <header>
-		<h2>Forum</h2>
-	</header> -->
 	<nav>
-		<span class="logo">Mango Forum</span>
-		<span class="navlinks">
-			<span class="navlink" onclick="window.location.href = 'repliesdemo.html';">Replies Demo Page</span>
-			<!-- <span class="navlink">Settings</span>
-			<span class="navlink">Login</span> -->
-		</span>
+		<div class="nav_logo">mango</div>
+		<div class="nav_links" id="nav_links">
+			<div class="nav_link" style="border:0;">
+				Loading Categories...
+			</div>
+			<!-- <div class="nav_link">
+				<i class="material-icons nav_delete" onclick="deletecategory(1);">close</i>
+				<span class="nav_link_text" onclick="switchcategory(1);">
+					News<br>64 Posts
+				</span>
+			</div>
+			<div class="nav_link nav_link_active" onclick="">
+				<i class="material-icons nav_delete">close</i>
+				<span class="nav_link_text">
+					News<br>64 Posts
+				</span>
+			</div>
+			<div class="nav_link" onclick="">
+				<i class="material-icons nav_delete">close</i>
+				<span class="nav_link_text">
+					News<br>64 Posts
+				</span>
+			</div> -->
+		</div>
+		<div class="nav_create hidden" id="nav_create">
+			<input class="nav_create_input" type="text" placeholder="New Category" id="nav_create_input">
+			<span class="nav_create_button" onclick="createcategory()">+</span>
+		</div>
+		<div class="nav_user">
+			<i class="material-icons nav_user_toggle">keyboard_arrow_up</i>
+			<span class="nav_user_button" id="user_loginbutton">Login</span>
+			<!-- <span class="nav_user_button" id="user_settingsbutton">Settings</span> -->
+			<span class="nav_user_button" id="user_logoutbutton">Logout</span>
+			
+		</div>
 	</nav>
 
-	<main id="main">
-		<span class="pagetitle">Mango Forum</span> <span style="float:right;cursor:pointer;" onclick="clearposts();">Clear All Posts</span>
-		<div class="form">
-			<div class="bar">Create Post</div>
-			<!-- <label for="new_title">New Post Title</label> -->
-			<input type="text" id="new_post_title" name="new_title" placeholder="New Post Title">
-
-			<!-- <label for="new_content">Content</label> -->
-			<textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:100px"></textarea>
-
-			<input type="submit" id="new_post_button" value="Create Post" onclick="sendnewpost();">
-		</div>
-
-		<!-- <div class="post" id="createanimation">
-			<div class="bar">&nbsp;<span class="datetime"></span></div>
-			<h3></h3>
-		</div> -->
-
-		<!-- <div class="post">
-			<div class="bar">John Smith <span class="datetime">5/12/19 3:36pm</span></div>
-			<h3>Example Post Title</h3><br>
-			Example post content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-			
-			<div class="replies replieshide" id="post_1_replies">
-				<h4>Replies</h4><span class="toggle" onclick="toggle(1);">Replies<span class="arrow" id="arrow_1"><span></span><span></span></span></span>
-				<div class="reply">
-					<div class="bar">Sam Davis <span class="datetime">5/13/19 4:26pm</span></div>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				</div>
-				<div class="reply">
-					<div class="bar">Mason Jones <span class="datetime">5/13/19 5:60pm</span></div>
-					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				</div>
-				<div class="reply">
-					<div class="bar">Create Reply</div>
-					<textarea id="new_reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
-					<input type="submit" value="Create Reply" onclick="">
-				</div>
+	<section class="rightside">
+		<main id="main">
+			<div class="main_top">
+				<span class="main_title" id="main_title">Works</span>
+				<span class="main_search">Search Threads</span>
+				<span class="main_newbutton hidden" id="main_newbutton" onclick="newarticle_editor();">+</span>
 			</div>
-		</div>
-		<div class="post">
-			<div class="bar">Anne Doe <span class="datetime">5/10/19 12:50pm</span></div>
-			<h3>Hello World!</h3><br>
-			Platea dictumst vestibulum rhoncus est pellentesque elit. Leo vel orci porta non pulvinar. Consectetur libero id faucibus nisl tincidunt eget nullam. Sit amet commodo nulla facilisi. Vel pretium lectus quam id leo in vitae. Faucibus scelerisque eleifend donec pretium vulputate sapien nec sagittis aliquam. Consectetur a erat nam at lectus urna. Massa tincidunt dui ut ornare lectus sit amet est placerat. Pharetra vel turpis nunc eget lorem dolor sed viverra ipsum. Faucibus purus in massa tempor nec feugiat. Morbi tristique senectus et netus et. Amet cursus sit amet dictum sit amet justo. Vitae tortor condimentum lacinia quis vel eros donec ac.
-			<br><br>
-			Dis parturient montes nascetur ridiculus mus mauris vitae ultricies. A diam sollicitudin tempor id eu nisl nunc. Posuere sollicitudin aliquam ultrices sagittis orci a scelerisque purus. Eget est lorem ipsum dolor sit amet consectetur adipiscing. Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Sapien nec sagittis aliquam malesuada bibendum arcu. Consequat nisl vel pretium lectus quam id leo in vitae. Sed augue lacus viverra vitae congue eu consequat ac felis. Fermentum leo vel orci porta. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu vitae. Dolor sit amet consectetur adipiscing.
-			<div class="replies replieshide" id="post_2_replies">
-				<h4>Replies</h4><span class="toggle" onclick="toggle(2);">Replies<span class="arrow" id="arrow_2"><span></span><span></span></span></span>
-				<div class="reply">
-					<div class="bar">Megan Hills <span class="datetime">5/11/19 1:35am</span></div>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				</div>
-				<div class="reply">
-					<div class="bar">Reily Trott <span class="datetime">5/12/19 8:53am</span></div>
-					Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				</div>
-				<div class="reply">
-					<div class="bar">Mufasa Simba <span class="datetime">5/13/19 12:50pm</span></div>
-					Imperdiet sed euismod nisi porta lorem mollis aliquam ut. Sapien nec sagittis aliquam malesuada bibendum arcu. Consequat nisl vel pretium lectus quam id leo in vitae. Sed augue lacus viverra vitae congue eu consequat ac felis. Fermentum leo vel orci porta. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum arcu vitae. Dolor sit amet consectetur adipiscing.
-				</div>
-				<div class="reply">
-					<div class="bar">Create Reply</div>
-					<textarea id="new_reply_content" name="reply_content" placeholder="Write something.." style="height:100px"></textarea>
-					<input type="submit" value="Create Reply" onclick="">
-				</div>
-			</div>
-		</div> -->
-			
-	</main>
+			<div class="main_settings" id="main_settings">
+				<span class="main_settings_title">Category Settings</span>
+				<i class="material-icons category_settings" style="float:right" onclick="toggle_categorysettings(1);">close</i>
+				<br>
+				<br>
+				Visibility: <br>
+				<input type="radio" name="gender" value="1" checked="checked"> Public<br>
+				<input type="radio" name="gender" value="0"> Private<br>
 
+				<br>
+				Name: <br>
+				<input type="text" placeholder="Name" value="CategoryName"><br>
+
+				<br>
+				Delete Category: <br>
+				<input type="submit" value="Delete Category"><br>
+
+				<br>
+				Users:
+				<table style="border:1px solid white">
+				  <tr>
+				    <th class="tg-0lax">Username</th>
+				    <th class="tg-0lax">Type</th>
+				    <th class="tg-0lax">Manage</th>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Jonathan</td>
+				    <td class="tg-0lax">Owner</td>
+				    <td class="tg-0lax"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Daniel</td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1" selected="selected">Moderator</option>
+						  <option value="2">User</option>
+						</select>
+					</td>
+				    <td class="tg-0lax"><input type="button" value="Remove User"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax">Angela</td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1">Moderator</option>
+						  <option value="2" selected="selected">User</option>
+						</select>
+				    </td>
+				    <td class="tg-0lax"><input type="button" value="Remove User"></td>
+				  </tr>
+				  <tr>
+				    <td class="tg-0lax"><input type="text" placeholder="Add User" value=""></td>
+				    <td class="tg-0lax">
+				    	<select>
+						  <option value="1">Moderator</option>
+						  <option value="2" selected="selected">User</option>
+						</select>
+				    </td>
+				    <td class="tg-0lax"><input type="button" value="Add User"></td>
+				  </tr>
+				</table>
+
+				<br>
+				<input type="submit" value="Save Settings">
+			</div>
+			<div class="main_articles" id="main_articles">
+
+				<div class="main_article" style="box-shadow:0;border:0">
+					Loading Posts...
+				</div>
+				<!-- <div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+					<i class="material-icons main_article_delete">close</i>
+				</div>
+				<div class="main_article main_article_active">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div>
+				<div class="main_article">
+					<div class="main_article_left"><i class="material-icons main_article_icon">account_circle</i></div>
+					<div class="main_article_right">
+						<span class="main_article_title">Article 1</span><br>
+						<span class="main_article_author">By Jonathan. 14 replies. Last reply 2 hours ago.</span>
+					</div>
+				</div> -->
+			</div>
+		</main>
+
+		<article id="article">
+			<div class="article_post">
+				<h3>Loading Post...</h3>
+				<!-- <h3>My Article: New Article with content.</h3>
+				By <b>Jonathan Hsu</b> on 3 January 2017<br><br>
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Proin fermentum leo vel orci porta non pulvinar. Ut diam quam nulla porttitor massa id neque aliquam vestibulum. Velit laoreet id donec ultrices. Quis ipsum suspendisse ultrices gravida dictum fusce ut placerat orci. Suscipit adipiscing bibendum est ultricies integer quis auctor. Vel eros donec ac odio. <br><br>
+
+				Commodo sed egestas egestas fringilla phasellus faucibus scelerisque eleifend donec. Erat nam at lectus urna duis convallis. Semper feugiat nibh sed pulvinar. Ut eu sem integer vitae justo eget magna fermentum iaculis. Ac tortor vitae purus faucibus ornare suspendisse sed nisi. Sed arcu non odio euismod lacinia at quis risus. Rhoncus dolor purus non enim praesent elementum facilisis leo vel. Iaculis at erat pellentesque adipiscing commodo elit at.<br><br>
+
+				Etiam erat velit scelerisque in dictum non consectetur a. Amet consectetur adipiscing elit pellentesque. At imperdiet dui accumsan sit. Arcu dictum varius duis at consectetur lorem donec massa. Urna molestie at elementum eu facilisis sed odio morbi quis. Nunc lobortis mattis aliquam faucibus purus. Quisque id diam vel quam. Tortor at auctor urna nunc id cursus metus aliquam eleifend. Venenatis tellus in metus vulputate eu scelerisque felis imperdiet proin.  -->
+
+				<!-- Tortor posuere ac ut consequat semper viverra nam. Aenean sed adipiscing diam donec adipiscing tristique risus. Tristique et egestas quis ipsum suspendisse. Ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue. Amet nisl suscipit adipiscing bibendum est ultricies integer. Adipiscing at in tellus integer. Aenean euismod elementum nisi quis eleifend quam adipiscing vitae. Amet risus nullam eget felis.<br><br>
+
+				A pellentesque sit amet porttitor eget dolor morbi. Purus sit amet luctus venenatis lectus magna fringilla. Sed vulputate mi sit amet mauris. Faucibus nisl tincidunt eget nullam non nisi est sit. Tellus integer feugiat scelerisque varius morbi enim. Feugiat pretium nibh ipsum consequat nisl vel. Aliquet enim tortor at auctor urna nunc id. Sed libero enim sed faucibus turpis in eu. Quisque non tellus orci ac auctor. Aliquam etiam erat velit scelerisque in. Aliquet risus feugiat in ante metus dictum at tempor commodo. Lectus magna fringilla urna porttitor rhoncus dolor purus. Venenatis cras sed felis eget velit aliquet sagittis id. Vel facilisis volutpat est velit egestas dui id ornare. Eu lobortis elementum nibh tellus molestie nunc non blandit.<br><br>
+
+				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in. Duis at consectetur lorem donec massa sapien. Vel pharetra vel turpis nunc. Odio euismod lacinia at quis. Cras fermentum odio eu feugiat pretium. -->
+			</div>
+			<div class="article_reply">
+				<!-- <h3>Replies</h3><br>
+				<b>John Smith</b> on 12 January 2017<br><br>
+				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in.<br><br>
+				<hr style="height:1px;background-color:rgba(0,0,0,0.2);box-shadow: 0;border : 0;">
+				<br><br>
+				<b>Anne Doe</b> on 12 January 2017<br><br>
+				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in.<br><br>
+				<hr style="height:1px;background-color:rgba(0,0,0,0.2);box-shadow: 0;border : 0;">
+				<br><br>
+				<b>Sam Davis</b> on 12 January 2017<br><br>
+				Congue mauris rhoncus aenean vel elit scelerisque mauris pellentesque pulvinar. Ornare arcu dui vivamus arcu. Sociis natoque penatibus et magnis dis. Mattis enim ut tellus elementum sagittis vitae et. Nam libero justo laoreet sit amet cursus sit amet. Diam sollicitudin tempor id eu nisl nunc. Mattis aliquam faucibus purus in. -->
+			</div>
+		</article>
+			
+	</div>
 	<script src="script.js"></script>
-	<script>
-		function toggle(postid) {
-			let element = document.getElementById("post_" + postid + "_replies");
-			let arrow = document.getElementById("arrow_" + postid);
-			if (element.classList.contains("replieshide")) {
-				element.classList.add("repliesshow");
-				element.classList.remove("replieshide");
 
-				arrow.classList.add("active");
-			}
-			else if (element.classList.contains("repliesshow")) {
-				element.classList.remove("repliesshow");
-				element.classList.add("replieshide");
-				
-				arrow.classList.remove("active");
-			}
-			else {
-				console.log("error1");
-			}
-			
-		}
-	</script>
 </body>
 </html>
 
