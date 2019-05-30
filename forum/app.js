@@ -95,47 +95,152 @@ function getSingleCategory(categoryid, cb) {
     });
 }
 
-//category_od, obj
+function getSinglePost(categoryid, post_id, user_id, cb) {
+    let sqlquery = "SELECT * FROM posts WHERE category_id=" + categoryid + " AND post_id=" + post_id + " AND user_id=" + user_id;
+    db.all(sqlquery, function(err, rows) {
+        if(err) { cb(err,null); }
+        else if(rows.length < 1) {
+            cb(null,null);
+        }else {
+            cb(null,rows[0]);
+        }
+    });
+}
+
+/*
+getSinglePost(4, 3, 2, function(posts_err, posts_row) {
+    if(posts_err)
+        console.log("Error! Can't find posts!");
+    else
+    {
+        console.log(posts_row);
+    }
+});
+*/
+
+function getSingleReply(categoryid, post_id, user_id, reply_id, cb) {
+    let sqlquery = "SELECT * FROM replies WHERE category_id=" + categoryid + " AND post_id=" + post_id + " AND user_id=" + user_id + " AND reply_id=" + reply_id;
+    db.all(sqlquery, function(err, rows) {
+        if(err) { cb(err,null); }
+        else if(rows.length < 1) {
+            cb(null,null);
+        }else {
+            cb(null,rows[0]);
+        }
+    });
+}
+
+/*
+getSingleReply(4, 3, 2, 6, function(replies_err, replies_row) {
+    if(replies_err)
+        console.log("Error! Can't find replies!");
+    else
+    {
+        console.log(replies_row);
+    }
+});
+*/
+
+function checkOwnership(category_id, post_id, user_id, reply_id, cb)
+{
+    if(reply_id === -1)
+    {
+        getSinglePost(category_id, post_id, user_id, function(posts_err, posts_row) {
+            if(posts_err)
+                console.log("Error! Can't find posts!");
+            else
+            {
+                console.log(posts_row);
+                if(posts_row == null)
+                    cb(false);
+                else
+                    cb(true);
+            }
+        });
+    }
+    else
+    {
+        getSingleReply(category_id, post_id, user_id, reply_id, function(replies_err, replies_row) {
+            if(replies_err)
+                console.log("Error! Can't find replies!");
+            else
+            {
+                //console.log(replies_row);
+                if(replies_row == null)
+                    cb(false);
+                else
+                    cb(true);
+            }
+        });
+    }
+}
+//4,3,2,-1, should return true
+// checkOwnership(4, 3, 2, 6, function(condition) {
+//     console.log(condition);
+// });
+
+
+
+
+
 function checkAccess(user_id, category_id, operation, element)
 {
     users.find_userid(user_id, db, function(users_err, users_row) {
         if(users_err)
-            console.log("finding users error");
+            console.log("Error! Can't find users!");
         else 
         {
             getSingleRole(user_id, category_id, function(roles_err, roles_row) {
                 if(roles_err)
-                    console.log("finding roles error");
+                    console.log("Error! Can't find roles!");
                 else
                 {
                     getSingleCategory(category_id, function(categories_err, categories_row) {
                         let user_role = 'none';
                         let category_type = -1; // public for now
                         if(categories_err)
-                            console.log("finding categories error")
+                            console.log("Error! Can't find categories!");
                         else
                         {
-                            //console.log(users_row);
-                            //console.log(roles_row);
-                            //console.log(categories_row);
-                            if(users_row == null)
-                                user_role = 'guest';
-                            else if(users_row.role == 1)
-                                user_role = 'admin';
-                            else if(roles_row == null)
-                                user_role = 'user';
-                            else if (roles_row.role == 1)
-                                user_role = 'member';
-                            else if (roles_row.role == 2)
-                                user_role = 'moderator';
-                            if(categories_row == null)
-                                console.log("category doesn't exist");
-                            else
-                                category_type = categories_row.public;
+                            checkOwnership(4, 3, 7, 6, function(condition) {
+                                //console.log(condition);
                             
-                            let accessGranted = hasAccess(operation, element, user_role, category_type);
-                            console.log(accessGranted);
-                            //cb();
+                                //console.log(users_row);
+                                //console.log(roles_row);
+                                //console.log(categories_row);
+                                if(users_row == null)
+                                    user_role = 'guest';
+                                else if(users_row.role == 1)
+                                    user_role = 'admin';
+                                else if(roles_row == null)
+                                    user_role = 'user';
+                                else if (roles_row.role == 1)
+                                    user_role = 'member';
+                                else if (roles_row.role == 2)
+                                    user_role = 'moderator';
+                                if(categories_row == null)
+                                    console.log("category doesn't exist");
+                                else
+                                    category_type = categories_row.public;
+
+                                if((operation === 'update' || operation === 'delete') && (element === 'post' || element === 'reply'))
+                                {
+                                    if(!condition)
+                                        console.log("condition",condition)
+                                    //if inside here, return false, aka make cb false
+                                } // when execution goes beyond this if statement
+                                let accessGranted = hasAccess(operation, element, user_role, category_type);
+                                console.log("access" ,accessGranted);
+
+                                //if operation is update and element is post or reply
+                                //  check ownership, if none return false
+
+                                //if operation is delete and element is post or reply 
+                                // check ownership, if none return false
+                                
+
+                                //cb();
+                            });
                         }
                     });
                 }
@@ -143,7 +248,7 @@ function checkAccess(user_id, category_id, operation, element)
         }
     });
 }
-checkAccess(2,5,'read','reply');
+checkAccess(2,5,'update','reply');
 
 
 
@@ -215,7 +320,9 @@ function hasAccess(operation, element, user_role, type)
         }
         else // element is either post or reply
         {
-            if (category_type === 1)
+            if (category_type === 0 && user_role === 'user')
+                return false;
+            else
             {
                 if(user_role === 'member')
                     user_role = 'user';
@@ -228,26 +335,6 @@ function hasAccess(operation, element, user_role, type)
                 {
                     const permission = ac.can(user_role).updateOwn('post');
                     return permission.granted;
-                }
-            }
-            else if(category_type === 0)// if private
-            {
-                if(user_role === 'user')
-                    return false;
-                else
-                {
-                    if(user_role === 'member')
-                        user_role = 'user'
-                    //1 check for ownership
-                    //create function to check for post ownership
-                    ownsPost = true // for now true ownsPost()
-                    if(!ownsPost)
-                        return false;
-                    else
-                    {
-                        const permission = ac.can(user_role).updateOwn('post');
-                        return permission.granted;
-                    }
                 }
             }
         }
