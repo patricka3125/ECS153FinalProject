@@ -113,7 +113,7 @@ ac.grant('user')
         .deleteAny('reply')
     .grant('admin')
         .extend('moderator')
-        .deleteAny('category'); 
+        .deleteAny('category');
         
 
 function getSingleRole(userid, categoryid, cb) {
@@ -261,19 +261,23 @@ function checkAccess(user_id, category_id, operation, element)
                                     user_role = 'user';
                                 else if (roles_row.role == 1)
                                     user_role = 'member';
-                                else if (roles_row.role == 2)
+                                else if (roles_row.role == 2) //if moderator, then must own the category with category_id
                                     user_role = 'moderator';
                                 if(categories_row == null)
                                     console.log("category doesn't exist");
                                 else
                                     category_type = categories_row.public;
 
+                                //check if the user owns the pos/reply they are trying to edit/delete
                                 if((operation === 'update' || operation === 'delete') && (element === 'post' || element === 'reply'))
                                 {
                                     if(!condition)
                                         console.log("condition",condition)
                                     //if inside here, return false, aka make cb false
                                 } // when execution goes beyond this if statement
+
+                                //at this point non eed to check ownership, post/reply figured out and the category
+                                // ownership is figured out in hasAccess
                                 let accessGranted = hasAccess(operation, element, user_role, category_type);
                                 console.log("access" ,accessGranted);
 
@@ -325,11 +329,9 @@ function hasAccess(operation, element, user_role, type)
             return false;
         if (element === 'category')
         {
-            //category doesn't exist, so 'member' hold not be possible
             if(user_role === 'member')
                 user_role = 'user'
             const permission = ac.can(user_role).createOwn('category');
-            // need to update data base in createNewCateory()
             return permission.granted;
         }
         else // element is either post or reply
@@ -371,16 +373,12 @@ function hasAccess(operation, element, user_role, type)
             {
                 if(user_role === 'member')
                     user_role = 'user';
-                 //1 check for ownership
-                //create function to check for post ownership
-                ownsPost = true // for now true ownsPost()
-                if(!ownsPost)
-                    return false;
-                else
-                {
-                    const permission = ac.can(user_role).updateOwn('post');
-                    return permission.granted;
-                }
+                //if admin or moderator check Any, else check Own(ownership is figured out in checkAccess)
+                // the ownership of the category for a moderator is figured out in checkAccess
+                const permission = (user_role === 'admin' || user_role === 'moderator')
+                    ? ac.can(user_role).updateAny(element)
+                    : ac.can(user_role).updateOwn(element);
+                return permission.granted;
             }
         }
     }
@@ -401,38 +399,20 @@ function hasAccess(operation, element, user_role, type)
         }
         else // element is either post or reply
         {
-            if (category_type === 1)
+            if (category_type === 0 && user_role === 'user')
+                return false;
+            else
             {
                 if(user_role === 'member')
                     user_role = 'user';
-                //1 check for ownership
-                //create function to check for post ownership
-                ownsPost = true // for now true ownsPost()
-                const permission = (ownsPost)
-                    ?ac.can(user_role).deleteOwn('post')
-                    :ac.can(user_role).deleteAny('post');
+                //if admin or moderator check Any, else check Own(ownership is figured out in checkAccess)
+                // the ownership of the category for a moderator is figured out in checkAccess
+                const permission = (user_role === 'admin' || user_role === 'moderator')
+                    ?ac.can(user_role).deleteAny(element)
+                    :ac.can(user_role).deleteOwn(element);
                 return permission.granted;
             }
-            //instead of retrun true, I need to check if the user owns the comment or reply...
-            else if(category_type === 0)// if private
-            {
-                if(user_role === 'user')
-                    return false;
-                else
-                {
-                    if(user_role === 'member')
-                        user_role = 'user'
-                    //1 check for ownership
-                    //create function to check for post ownership
-                    ownsPost = true // for now true ownsPost()
-                    const permission = (ownsPost)
-                        ?ac.can(user_role).deleteOwn('post')
-                        :ac.can(user_role).deleteAny('post');
-                    return permission.granted;
-                }
-            }
         }
-
     }
     return false; // by default 
 }
@@ -459,7 +439,7 @@ function testAC()
     }
 }
 
-//testAC();
+testAC();
 
 // ===============================================================================
 
