@@ -1,3 +1,4 @@
 
 forum/node_modules/
 # *.db
+forum/npm-debug.log
