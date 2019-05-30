@@ -465,7 +465,7 @@ function testAC()
 
 // ===============================================================================
 
-let tempuserid = 2;
+// let tempuserid = 2;
 
 function newcategory (req, res, next) {
     // Create new category
@@ -479,6 +479,8 @@ function newcategory (req, res, next) {
 //        next();
 //    }
 // });
+
+// TODO: add creator into owner role
     let qobj = req.query;
     if (qobj.categoryname != undefined && qobj.public != undefined) {
         // category name should be alpha only
@@ -489,9 +491,24 @@ function newcategory (req, res, next) {
 
         console.log(qobj.categoryname, qobj.public);
 
-        db.run(sqlquery, [qobj.categoryname, qobj.public]);
+        // create the new category
+        db.run(sqlquery, [qobj.categoryname, qobj.public], function(err) {
 
-        res.send(myresult);
+            // get the new category's id
+            sqlquery = "SELECT category_id FROM categories WHERE title=" + qobj.categoryname;
+
+            db.all(sqlquery, function(err, rows) {
+                newcategoryid = rows[0].category_id;
+                sqlquery = "INSERT INTO roles(user_id, category_id, role) VALUES(?, ?, ?)";
+
+                db.run(sqlquery, [req.user.id, newcategoryid, 1], function(err) { // 1=owner
+                    res.send(myresult);
+                });
+
+            });
+
+        });
+        
     }
     else {
         console.log("Undefined");
@@ -534,8 +551,10 @@ function deletecategory (req, res, next) {
 function getcategorynames (req, res, next) {
     // Get categorynames:
     // /getcategorynames
-    console.log(req.user);
+    // console.log(req.user);
 
+// TODO: if logged in -> get public + member ones
+//       if guest     -> get public only
     let sqlquery = "SELECT * FROM categories";
 
     db.all(sqlquery, function(err, rows) {
@@ -569,7 +588,7 @@ function newpost (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined) {
-        let sqlquery = "INSERT INTO posts(category_id, date_created, title, content) VALUES(?, ?, ?, ?)";
+        let sqlquery = "INSERT INTO posts(category_id, date_created, title, content, user_id) VALUES(?, ?, ?, ?, ?)";
         
         let new_title = SqlString.escape(req.body.title);
         let new_content = SqlString.escape(req.body.content);
@@ -578,7 +597,7 @@ function newpost (req, res, next) {
 
         let myresult = "inserted";
 
-        db.run(sqlquery, [qobj.categoryid, new_datetime, new_title, new_content]);
+        db.run(sqlquery, [qobj.categoryid, new_datetime, new_title, new_content, req.user.id]);
 
         console.log("creating: ", qobj.categoryid, new_datetime, new_title, new_content);
         res.send(myresult);
@@ -636,8 +655,9 @@ function deletepost (req, res, next) {
 function getpost (req, res, next) { // ################################fix string
     // Get post (and replies)
     // /getpost?categoryid=___&postid=___
-    console.log("Get post req user: ", req.user);
-    console.log("Authenticated? ", req.isAuthenticated());
+    
+    // console.log("Get post req user: ", req.user);
+    // console.log("Authenticated? ", req.isAuthenticated());
 
 
     let qobj = req.query;
@@ -666,7 +686,7 @@ function newreply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content) VALUES(?, ?, ?, ?)";
+        let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content, user_id) VALUES(?, ?, ?, ?, ?)";
         
         // let new_title = SqlString.escape(req.body.title);
         let new_content = SqlString.escape(req.body.content);
@@ -675,7 +695,7 @@ function newreply (req, res, next) {
 
         let myresult = "inserted";
 
-        db.run(sqlquery, [qobj.categoryid, qobj.postid, new_datetime, new_content]);
+        db.run(sqlquery, [qobj.categoryid, qobj.postid, new_datetime, new_content, req.user.id]);
 
         res.send(myresult);
     }
@@ -740,14 +760,14 @@ function getuserroles(userid, cb) {
 function getuserprofile (req, res, next) {
     // could be handled by the session cookie, but don't. 
     // need to check if user is able to get info on userid
-    // getuserprofile?userid=___
-    // username, role, [owned_categories], [moderator_categories], [user_categories]
+    // getuserprofile
+    // id, username, role, [owned_categories], [moderator_categories], [user_categories]
 
-    let qobj = req.query;
-    if (qobj.userid != undefined) {
-        // console.log("finding user " + qobj.userid);
+    // let qobj = req.query;
+    // console.log(req.user);
+    if (req.isAuthenticated()) {
 
-        users.find_userid(qobj.userid, db, function(err, row) {
+        users.find_userid(req.user.id, db, function(err, row) {
             // console.log(err, row);
             if(err) {
                 console.log("finding user error");
@@ -761,7 +781,7 @@ function getuserprofile (req, res, next) {
                 // don't send the password! 
                 // get roles
 
-                getuserroles(qobj.userid, function(roles_err, roles_rows) {
+                getuserroles(req.user.id, function(roles_err, roles_rows) {
                     if(roles_err) {
                         console.log("finding roles error");
                         res.send(null);
@@ -793,8 +813,11 @@ function getuserprofile (req, res, next) {
         
     }
     else {
-        console.log("Undefined");
-        next();
+        res.status(401);
+        res.send("");
+        console.log("Not logged in");
+        // return;
+        // return next();
     }
 
 }
@@ -808,7 +831,7 @@ function getauthor( req, res, next ) {
         users.find_userid(qobj.userid, db, function(err, row) {
             // console.log(err, row);
             if(err) {
-                console.log("finding user error");
+                // console.log("finding user error");
                 res.send(null);
             }
             else if(row == null) {

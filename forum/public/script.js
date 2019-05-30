@@ -1,6 +1,3 @@
-// temp current user
-let tempuserid = 2;
-
 // auto-height textarea
 // from https://stackoverflow.com/a/25621277
 var tx = document.getElementsByTagName('textarea');
@@ -95,14 +92,15 @@ function get_categorysettings(categoryid) {
 
 // AUTHORS
 
-function getuserprofile(userid, cb) {
-	let url = "/getuserprofile?userid=" + userid;
+function getuserprofile(cb) {
+	let url = "/getuserprofile";
 	let xhr = createCORSRequest('GET', url);
 	if (!xhr) { throw new Error('CORS not supported');}
 
   	// Load some functions into response handlers.
 	xhr.onload = function() {
-		if(xhr.responseText == "") {
+		console.log(xhr.responseText);
+		if(xhr.status == 401){//xhr.responseText == "") {
 			cb(null);
 		}
 		else {
@@ -447,12 +445,13 @@ function getpost(categoryid, postid) {
 		}
 
 		// accesscontrol: create reply?
+		// only member categories are shown
 		let canreply = "hidden"; // cannot delete
-		if (global_userprofile != null && (
-			global_userprofile["owned_categories"].includes(object[i].category_id) ||
-			global_userprofile["moderator_categories"].includes(object[i].category_id) ||
-			global_userprofile["user_categories"].includes(object[i].user_id) || // if user is a member of the category
-			global_userprofile["role"] == 1)) {
+		if (global_userprofile != null) { //&& (
+			// global_userprofile["owned_categories"].includes(object[i].category_id) ||
+			// global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+			// global_userprofile["user_categories"].includes(object[i].user_id) || // if user is a member of the category
+			// global_userprofile["role"] == 1)) {
 			canreply = ""; // can delete
 		}
 
@@ -628,9 +627,11 @@ let global_categorypermissions = null;
 let global_userprofile = null;
 
 // first get userprofile
-getuserprofile(tempuserid, function(userprofile) {
+getuserprofile(function(userprofile) {
 	if(userprofile != null) {
 		document.getElementById("user_loginbutton").textContent = "Logged in as " + userprofile.username;
+		document.getElementById("user_loginbutton").setAttribute("onClick", "");
+		document.getElementById("user_loginbutton").classList += "login_static";
 	}
 
 	// load:

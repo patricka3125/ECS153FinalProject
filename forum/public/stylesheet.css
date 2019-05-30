@@ -212,6 +212,10 @@ nav {
 	justify-content: space-around;
 	cursor:pointer;
 }
+.login_static {
+	cursor:text !important;
+
+}
 .rightside {
 	width:100%;
 	display:flex;
