@@ -446,10 +446,18 @@ function getpost(categoryid, postid) {
 			}
 		}
 
-		
+		// accesscontrol: create reply?
+		let canreply = "hidden"; // cannot delete
+		if (global_userprofile != null && (
+			global_userprofile["owned_categories"].includes(object[i].category_id) ||
+			global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+			global_userprofile["user_categories"].includes(object[i].user_id) || // if user is a member of the category
+			global_userprofile["role"] == 1)) {
+			canreply = ""; // can delete
+		}
 
 		let createreply_htmlstring = `
-			<div class="article_createreply">
+			<div class="article_createreply `+canreply+`">
 				<br><h3>Create Reply</h3>
 				<textarea class="article_createreply_content" id="article_createreply_content" name="new_content" placeholder="Write something.."></textarea>
 				<input type="submit" class="new_reply_button" id="new_reply_button" value="Create Reply" onclick="createreply(`+categoryid+`,`+postid+`);">
