@@ -228,7 +228,7 @@ function checkOwnership(category_id, post_id, user_id, reply_id, cb)
 
 
 
-function checkAccess(user_id, category_id, operation, element)
+function checkAccess(user_id, category_id, operation, element, cb)
 {
     users.find_userid(user_id, db, function(users_err, users_row) {
         if(users_err)
@@ -272,23 +272,25 @@ function checkAccess(user_id, category_id, operation, element)
                                 if((operation === 'update' || operation === 'delete') && (element === 'post' || element === 'reply'))
                                 {
                                     if(!condition)
-                                        console.log("condition",condition)
+                                    {
+                                        //console.log("condition",condition)
+                                        cb(false);
+                                        return;
+                                    }
                                     //if inside here, return false, aka make cb false
                                 } // when execution goes beyond this if statement
 
                                 //at this point non eed to check ownership, post/reply figured out and the category
                                 // ownership is figured out in hasAccess
                                 let accessGranted = hasAccess(operation, element, user_role, category_type);
-                                console.log("access" ,accessGranted);
+                                //console.log("access" ,accessGranted);
 
                                 //if operation is update and element is post or reply
                                 //  check ownership, if none return false
 
                                 //if operation is delete and element is post or reply 
                                 // check ownership, if none return false
-                                
-
-                                //cb();
+                                cb(accessGranted);
                             });
                         }
                     });
@@ -297,7 +299,41 @@ function checkAccess(user_id, category_id, operation, element)
         }
     });
 }
-checkAccess(2,5,'update','reply');
+// //checkAccess(user_id, category_id, operation, element, cb)
+// checkAccess(5,2,'read','reply', function(accessGranted) {
+//     console.log("Access allowed: ", accessGranted);
+// });
+
+function testCheckAC()
+{
+    let operations = ['read','create','update','delete'];
+    let elements = ['category', 'post', 'reply'];
+    let user_ids = [1,2,3,4];
+    let category_ids = [1,2];
+    let i1 = 0;
+    for(i1; i1 < user_ids.length; i1++)
+    {
+        let i2 = 0;
+        for(i2; i2 < category_ids.length; i2++)
+        {
+            let j = 0;
+            for(j; j < operations.length; j++)
+            {
+                let k = 0;
+                for(k; k < elements.length; k++)
+                {
+                    //checkAccess(user_id, category_id, operation, element, cb)
+                    console.log(user_ids[i1], category_ids[i2], operations[j], elements[k]);
+                    checkAccess(user_ids[i1], category_ids[i2], operations[j], elements[k], function(accessGranted) {
+                        console.log(accessGranted);
+                    }); 
+                }
+            }
+        }
+    }
+}
+
+testCheckAC();
 
 
 
@@ -394,7 +430,6 @@ function hasAccess(operation, element, user_role, type)
             const permission = (user_role === 'moderator')
                    ? ac.can(user_role).deleteOwn('category') // if moderator then update own
                    : ac.can(user_role).deleteAny('category'); // if not moderator check if admin
-            //NEED TO UPDATE USER TO MODERATOR on categ. creation
             return permission.granted;
         }
         else // element is either post or reply
@@ -422,24 +457,24 @@ function testAC()
     let operations = ['read','create','update','delete'];
     let elements = ['category', 'post', 'reply'];
     let roles = ['guest','user','member', 'moderator', 'admin'];
-    let i = 0
+    let i = 0;
     for(i; i < roles.length; i++)
     {
-        let j = 0
+        let j = 0;
         for(j; j < operations.length; j++)
         {
-            let k = 0
+            let k = 0;
             for(k; k < elements.length; k++)
             {
-                //hasAccess(operation, element, role, category_id, type)
-                let tempp = hasAccess(operations[j], elements[k], roles[i], 1, 1);
+                //hasAccess(operation, element, user_role, type)
+                let tempp = hasAccess(operations[j], elements[k], roles[i], 0);
                 console.log(roles[i], operations[j], elements[k], tempp);
             }
         }
     }
 }
 
-testAC();
+//testAC();
 
 // ===============================================================================
 
