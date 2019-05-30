@@ -493,7 +493,7 @@ function newcategory (req, res, next) {
         db.run(sqlquery, [qobj.categoryname, qobj.public], function(err) {
 
             // get the new category's id
-            sqlquery = "SELECT category_id FROM categories WHERE title=" + qobj.categoryname;
+            sqlquery = "SELECT category_id FROM categories WHERE title='" + qobj.categoryname +"'";
 
             db.all(sqlquery, function(err, rows) {
                 newcategoryid = rows[0].category_id;
