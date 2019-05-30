@@ -1,3 +1,4 @@
 */*.*.swp
 *.*.swp
 package-lock.json
+mango.db

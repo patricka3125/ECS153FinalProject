@@ -570,6 +570,16 @@ function deletereply(categoryid, postid, replyid) {
 	xhr.send();
 }
 
+function logout() {
+    let url = "/logout";
+    let xhr = createCORSRequest('GET', url);
+    if (!xhr) {throw new Error('CORS not supported');}
+
+    xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+
+    xhr.send();
+}
+
 // END BASIC FUNCTIONALITY
 
 

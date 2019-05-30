@@ -805,6 +805,10 @@ app.post('/login', passport.authenticate('local', { successRedirect: '/',
                                                     failureRedirect: '/',
                                                     failureFlash: false })
 );
+app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/login.html');
+});
 
 app.get('/gettable', gettable);
 
