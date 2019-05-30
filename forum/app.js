@@ -57,22 +57,20 @@ app.use(passport.session());
 passport.use(new LocalStrategy(
     function(username, password, done) {
         // find username from db
-        users.find_user(username, db, function(err,user) {
-            if(err) { done(err); }
-            if(!user) {
+        users.validate_userpass(username, password, db, function(err,user) {
+            if(err) { 
+                done(err); 
+            }
+            else if(user == null) {
                 // return done(null, false, { message: 'Incorrect username.' });
-                console.log("wrong user");
+                console.log("invalid user/pass");
                 return done(null, false);
             }
-
-            // match password
-            if(!users.valid_password(username, password,db)) {
-                // return done(null, false, { message: 'Incorrect password.' });
-                console.log("wrong pass");
-                return done(null, false);
+            else {
+                console.log("logged in", user.username);
+                return done(null, user);
             }
-            // console.log("localstrategy", user);
-            return done(null, user);
+            
         });
     })
 );
@@ -803,7 +801,7 @@ function getuserprofile (req, res, next) {
                             }
                         }
                         let myresult = {"id": row.id,"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
-                        console.log("sending: ", myresult);
+                        // console.log("sending: ", myresult);
                         res.send(myresult);
                     }
                 });

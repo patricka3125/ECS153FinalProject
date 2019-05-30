@@ -39,18 +39,38 @@ exports.find_userid = function(userid,db,cb) {
     });
 }
 
-exports.valid_password = function(username,password,db) {
+// problem: need to use callback, because returns asynchronously -> always returns true
+// exports.valid_password = function(username,password,db) {
+//     if(!db) { cb(new Error('DB does not exist')); }
+
+//     let sqlquery = "SELECT * FROM users WHERE username='" + username
+//                    + "' AND password='" + password + "'";
+
+//     var is_valid = true;
+
+//     db.all(sqlquery, function(err, rows) {
+//         if(err) { is_valid = false; }
+//         if(rows.length < 1) { is_valid = false; }
+//     });
+
+//     return is_valid;
+// }
+
+exports.validate_userpass = function(username,password,db, cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
     let sqlquery = "SELECT * FROM users WHERE username='" + username
                    + "' AND password='" + password + "'";
 
-    var is_valid = true;
-
     db.all(sqlquery, function(err, rows) {
-        if(err) { is_valid = false; }
-        if(rows.length < 1) { is_valid = false; }
+        if(err) { 
+            cb(err, null);
+        }
+        else if(rows.length < 1) { 
+            cb(err, null);
+        }
+        else {
+            cb(err, rows[0]);
+        }
     });
-
-    return is_valid;
 }
