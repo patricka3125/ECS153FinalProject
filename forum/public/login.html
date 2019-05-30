@@ -40,17 +40,24 @@ label {
 input {
 	width:100%;
 	padding:10px;
-	margin-bottom:20px;
+	/*margin-bottom:20px;*/
 	border:0;
 }
-input:last-of-type {
-	margin-bottom:0;
+input:first-of-type {
+	margin-bottom:20px;
 }
 input[type=submit] {
 	cursor:pointer;
 }
 input[type=submit]:hover {
 	background-color:#ccc;
+}
+.errormessage {
+	color:red;
+	display:block;
+	margin-top:10px;
+	margin-bottom:10px;
+	height:1em;
 }
 </style>
 
@@ -60,7 +67,7 @@ input[type=submit]:hover {
 		<div class="login_box">
 			<span class="login_title">Login</span>
 
-			<form action="/login" method="post">
+			<!-- <form action="/login" method="post">
 				<label for="username">Username</label>
 				<input type="text" name="username" placeholder="username">
 
@@ -68,7 +75,16 @@ input[type=submit]:hover {
 				<input type="password" name="password" placeholder="password">
 
 				<input type="submit" value="Log In">
-			</form>
+			</form> -->
+			<div class="form">
+				<label for="username">Username</label>
+				<input type="text" name="username" placeholder="username" id="username">
+
+				<label for="password">Password</label>
+				<input type="password" name="password" placeholder="password" id="password">
+				<span class="errormessage" id="errormessage"></span>
+				<input type="submit" value="Log In" onclick="login();">
+			</div>
 		</div>
 		<div class="login_box">
 			Or
@@ -77,6 +93,6 @@ input[type=submit]:hover {
 		<br>
 		<span class="login_back" onclick="window.location.href = '../';"><= Back to Forum</span>
 	</div>
-	
+	<script src="users_client.js"></script>
 </body>
 </html>

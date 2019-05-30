@@ -575,6 +575,10 @@ function logout() {
     let xhr = createCORSRequest('GET', url);
     if (!xhr) {throw new Error('CORS not supported');}
 
+    xhr.onload = function() {
+    	location.reload();
+    }
+
     xhr.onerror = function() {alert('Woops, there was an error making the request.');};
 
     xhr.send();

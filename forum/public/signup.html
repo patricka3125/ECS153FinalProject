@@ -40,17 +40,27 @@ label {
 input {
 	width:100%;
 	padding:10px;
-	margin-bottom:20px;
+	/*margin-bottom:20px;*/
 	border:0;
 }
-input:last-of-type {
-	margin-bottom:0;
+input:first-of-type {
+	margin-bottom:20px;
 }
 input[type=submit] {
 	cursor:pointer;
 }
 input[type=submit]:hover {
 	background-color:#ccc;
+}
+.errormessage {
+	color:red;
+	display:block;
+	margin-top:10px;
+	margin-bottom:10px;
+	height:1em;
+}
+.successmessage {
+	display:none;
 }
 </style>
 
@@ -60,18 +70,22 @@ input[type=submit]:hover {
 		<div class="login_box">
 			<span class="login_title">Sign Up</span>
 
-			<div class="form">
+			<div class="form" id="form">
 				<!-- <div class="bar">Sign up:</div> -->
 				<label for="username">New Username</label>
 				<input type="text" id="new_username" name="username" placeholder="username">
 
 				<label for="password">New Password</label>
 				<input type="password" id="new_password" name="password" placeholder="password">
-
-				<input type="submit" id="sign_up_button" value="Sign Up" onclick="sign_up();">
+				<span class="errormessage" id="errormessage"></span>
+				<input type="submit" id="sign_up_button" value="Sign Up" onclick="signup();">
+			</div>
+			<div class="successmessage" id="successmessage">
+			Account created!
+			<input type="submit" onclick="window.location.href = '../login.html';" value="Login">
 			</div>
 		</div>
-		<div class="login_box">
+		<div class="login_box" id="box2">
 			Or
 			<input type="submit" onclick="window.location.href = '../login.html';" value="Login">
 		</div>

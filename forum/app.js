@@ -1,17 +1,19 @@
-const express = require('express');
-const bodyParser = require("body-parser");
-const AccessControl = require('accesscontrol');
-const port = 8080;
+// ===== dependancies =====
 
-// https://www.techiediaries.com/node-sqlite-crud/
-const sqlite3 = require("sqlite3").verbose();  // use sqlite
-const fs = require("fs");
-const flash = require("connect-flash");
+const express           = require('express');
+const bodyParser        = require("body-parser");
+const AccessControl     = require('accesscontrol');
+const sqlite3           = require("sqlite3").verbose();  // use sqlite
+const fs                = require("fs");
+const users             = require('./users');
+const passport          = require('passport');
+const LocalStrategy     = require('passport-local').Strategy; //passport local strategy
+const session           = require('express-session');//({ secret: 'mango', resave: false, saveUninitialized: false });
+const path              = require('path');
+const port              = 8080;
+const app               = express();
 
-const users = require('./users');
-const passport = require('passport');
-const local_strategy = require('passport-local').Strategy; //passport local strategy
-const session = require('express-session')({ secret: 'mango', resave: false, saveUninitialized: false });
+// ===== setup database =====
 
 const dbFileName = "mango.db";
 
@@ -44,6 +46,51 @@ function creationerror(err) {
         console.log(err);
     }
 }
+
+// ========== PASSPORT (Authentication) CODE ==================================
+
+app.use(session({ secret: 'mango', cookie: {secure: false, maxAge: 6 * 60 * 60 * 1000}, resave: false, saveUninitialized: false }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(
+    function(username, password, done) {
+        // find username from db
+        users.find_user(username, db, function(err,user) {
+            if(err) { done(err); }
+            if(!user) {
+                // return done(null, false, { message: 'Incorrect username.' });
+                console.log("wrong user");
+                return done(null, false);
+            }
+
+            // match password
+            if(!users.valid_password(username, password,db)) {
+                // return done(null, false, { message: 'Incorrect password.' });
+                console.log("wrong pass");
+                return done(null, false);
+            }
+            // console.log("localstrategy", user);
+            return done(null, user);
+        });
+    })
+);
+
+passport.serializeUser(function(user, cb) {
+    // console.log("serializing", user);
+    cb(null, user.id);
+});
+
+passport.deserializeUser(function(id, cb) {
+    // console.log("deserializing", id);
+    users.find_userid(id, db, function(err, user) {
+        if(err) { return cb(err); }
+        cb(null, user);
+    });
+});
+
+// ============================================================================
 
 //DEFINING THE ACCESS CONTROL BASIC STRUCTURE, WITHOUT PRIVATE
 
@@ -420,40 +467,6 @@ function testAC()
 
 let tempuserid = 2;
 
-// ========== PASSPORT (Authentication) CODE ==================================
-
-passport.use(new local_strategy(
-    function(username, password, done) {
-        // find username from db
-        users.find_user(username, db, function(err,user) {
-            if(err) { done(err); }
-            if(!user) {
-                return done(null, false, { message: 'Incorrect username.' });
-            }
-
-            // match password
-            if(!users.valid_password(username, password,db)) {
-                return done(null, false, { message: 'Incorrect password.' });
-            }
-
-            return done(null, user);
-        });
-    })
-);
-
-passport.serializeUser(function(user, cb) {
-    cb(null, user.id);
-});
-
-passport.deserializeUser(function(id, cb) {
-    users.find_userid(id, db, function(err, user) {
-        if(err) { return cb(err); }
-        cb(null, user);
-    });
-});
-
-// ============================================================================
-
 function newcategory (req, res, next) {
     // Create new category
     // /newcategory?categoryname=___&public=___
@@ -521,6 +534,7 @@ function deletecategory (req, res, next) {
 function getcategorynames (req, res, next) {
     // Get categorynames:
     // /getcategorynames
+    console.log(req.user);
 
     let sqlquery = "SELECT * FROM categories";
 
@@ -622,7 +636,10 @@ function deletepost (req, res, next) {
 function getpost (req, res, next) { // ################################fix string
     // Get post (and replies)
     // /getpost?categoryid=___&postid=___
-    console.log("I am in get post!");
+    console.log("Get post req user: ", req.user);
+    console.log("Authenticated? ", req.isAuthenticated());
+
+
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
         // categoryid should be int only
@@ -829,12 +846,17 @@ function gettable( req, res, next) {
 
 function create_user(req,res,next) {
     let qobj = req.query;
-    if(qobj.username != undefined && qobj.password != undefined) {
-        users.add_user(qobj.username,qobj.password,db, 
+    let username = req.body.username;
+    let password = req.body.password;
+    console.log("body:", username, password);
+
+    // make input validation more strict! 
+    if(username != "" && password != "" && username != null && password != null) {
+        users.add_user(username,password,db, 
             function(err) {
                 if(err) { console.log("Error, sign up attempt failed"); }
                 else {
-                    console.log("Signed up new user: " + qobj.username);
+                    console.log("Signed up new user:". username, password);
                     res.send("Sign-Up successful");
                 }
             }
@@ -854,17 +876,15 @@ function fileNotFound(req, res) {
     res.send('Cannot find '+url);
     }
 
-// put together the server pipeline
-const app = express()
+// server router
 
 app.use(express.static('public'));  // can I find a static file? 
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(flash());
+
 // app.get('/getposts', getpostsHandler);
 // app.post('/newpost', newpostHandler);
 // app.get('/clearposts', clearpostsHandler);
@@ -888,9 +908,27 @@ app.get('/getauthor', getauthor);
 
 app.post('/create_user', create_user);
 // TODO: sucessRedirect to user profile, failureRedirect to login page
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/',
-                                                    failureFlash: false })
+
+app.get('/login', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/login.html')); 
+});
+app.get('/signup', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/signup.html')); 
+});
+app.get('/loginfailure', function(req, res) {
+    res.status(401);
+    res.send("Login failure"); 
+});
+app.get('/loginsuccess', function(req, res) {
+    res.status(200);
+    res.send("Login success"); 
+});
+app.post('/login', passport.authenticate('local', { successRedirect: '/loginsuccess',
+                                                    failureRedirect: '/loginfailure',
+                                                    failureFlash: false })//,
+    // function(req, res) {
+    //     res.redirect()
+    // }
 );
 app.get('/logout', function(req, res) {
     req.logout();

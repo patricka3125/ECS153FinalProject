@@ -6,7 +6,6 @@
   "dependencies": {
     "accesscontrol": "^2.2.1",
     "body-parser": "^1.19.0",
-    "connect-flash": "^0.1.1",
     "express": "^4.16.4",
     "express-session": "^1.16.1",
     "passport": "^0.4.0",
