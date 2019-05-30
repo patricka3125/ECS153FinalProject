@@ -70,68 +70,91 @@ ac.grant('user')
         .extend('moderator')
         .deleteAny('category'); 
         
-//const permission = (req.user.name === req.params.username)
-//   ? ac.can(role).updateOwn('photo')
-//   : ac.can(role).updateAny('photo');
-//
-//console.log(permission.granted);
 
-//category_od, obj
-function findRole()
-{
-    // check if user is admin, if it is retrun admin
-    // if not check it is a moderator, or member(user) of a private function
-
-    //if user_id not in usr database, return guest
-    //if user_id in usr data base and is admin, return admin
-    //if user_id in usr data base but not in category database, return user
-    //if user_id in both usr and category databasem return memeber
-    //      a memebr has the same privs. as user inside the private 
-    //if user_id inside category and is a moderator, return moderator
-
-    //Check if user is in the database
-    let user_role = 'none';
-    let isAdmin = 0;
-    console.log("Read data from users");
-    user_id = 1
-    let sqlstr = "SELECT * FROM users WHERE id =" + user_id
-    db.all(sqlstr, function(err, rows) {
-          if (err) {
-            throw err;
-          }
-        rows.forEach((row) => {
-            console.log(row.id ,row.role);
-            isAdmin = row.role;
-        });
-    }); 
-
-    if(isAdmin)
-        return 'admin';
-    return user_role;
+function getSingleRole(userid, categoryid, cb) {
+    let sqlquery = "SELECT * FROM roles WHERE user_id=" + userid+" AND category_id="+categoryid;
+    db.all(sqlquery, function(err, rows) {
+        if(err) { cb(err,null); }
+        else if(rows.length < 1) {
+            cb(null,null);
+        }else {
+            cb(null,rows[0]);
+        }
+    });
 }
 
-/*
-    console.log("Read data from users");
-    db.all("SELECT id,role FROM users", function(err, rows) {
-          if (err) {
-            throw err;
-          }
-        rows.forEach((row) => {
-            console.log(row.id ,row.role);
-        });
-    }); 
-    */
+function getSingleCategory(categoryid, cb) {
+    let sqlquery = "SELECT * FROM categories WHERE category_id=" + categoryid;
+    db.all(sqlquery, function(err, rows) {
+        if(err) { cb(err,null); }
+        else if(rows.length < 1) {
+            cb(null,null);
+        }else {
+            cb(null,rows[0]);
+        }
+    });
+}
+
+//category_od, obj
+function checkAccess(user_id, category_id, operation, element)
+{
+    users.find_userid(user_id, db, function(users_err, users_row) {
+        if(users_err)
+            console.log("finding users error");
+        else 
+        {
+            getSingleRole(user_id, category_id, function(roles_err, roles_row) {
+                if(roles_err)
+                    console.log("finding roles error");
+                else
+                {
+                    getSingleCategory(category_id, function(categories_err, categories_row) {
+                        let user_role = 'none';
+                        let category_type = -1; // public for now
+                        if(categories_err)
+                            console.log("finding categories error")
+                        else
+                        {
+                            //console.log(users_row);
+                            //console.log(roles_row);
+                            //console.log(categories_row);
+                            if(users_row == null)
+                                user_role = 'guest';
+                            else if(users_row.role == 1)
+                                user_role = 'admin';
+                            else if(roles_row == null)
+                                user_role = 'user';
+                            else if (roles_row.role == 1)
+                                user_role = 'member';
+                            else if (roles_row.role == 2)
+                                user_role = 'moderator';
+                            if(categories_row == null)
+                                console.log("category doesn't exist");
+                            else
+                                category_type = categories_row.public;
+                            
+                            let accessGranted = hasAccess(operation, element, user_role, category_type);
+                            console.log(accessGranted);
+                            //cb();
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+checkAccess(2,5,'read','reply');
+
 
 
 //usr id (GLOBAL), userInfo(db), categoryInfo(db), 
 //FINAL USER ROLES: guest, user, moderator, admin
-function hasAccess(operation, element, role, category_id, type) // 
+function hasAccess(operation, element, user_role, type)
 {
     //need to get user role!!! (ONLY ONCE)
     //inside user role, if user is not listed inside categories data
     // base he is treated like a guest to the category!!!! 
     //findRole, checks the users role in the category
-    user_role = role //'guest' // use this temporary
     let category_type = type
 
     if(operation === 'read')
@@ -153,13 +176,15 @@ function hasAccess(operation, element, role, category_id, type) //
         if (element === 'category')
         {
             //category doesn't exist, so 'member' hold not be possible
+            if(user_role === 'member')
+                user_role = 'user'
             const permission = ac.can(user_role).createOwn('category');
             // need to update data base in createNewCateory()
-            return premission.granted;
+            return permission.granted;
         }
         else // element is either post or reply
         {
-            if (categoy_type === 1)
+            if (category_type === 1)
                 return true; //user,member,moderator and admin can create posts,replies
             else if(category_type === 0)// if private
             {
@@ -252,8 +277,8 @@ function hasAccess(operation, element, role, category_id, type) //
                 //create function to check for post ownership
                 ownsPost = true // for now true ownsPost()
                 const permission = (ownsPost)
-                ?ac.can(user_role).deleteOwn('post')
-                :ac.can(user_role).deleteAny('post');
+                    ?ac.can(user_role).deleteOwn('post')
+                    :ac.can(user_role).deleteAny('post');
                 return permission.granted;
             }
             //instead of retrun true, I need to check if the user owns the comment or reply...
@@ -269,8 +294,8 @@ function hasAccess(operation, element, role, category_id, type) //
                     //create function to check for post ownership
                     ownsPost = true // for now true ownsPost()
                     const permission = (ownsPost)
-                    ?ac.can(user_role).deleteOwn('post')
-                    :ac.can(user_role).deleteAny('post');
+                        ?ac.can(user_role).deleteOwn('post')
+                        :ac.can(user_role).deleteAny('post');
                     return permission.granted;
                 }
             }
@@ -279,64 +304,30 @@ function hasAccess(operation, element, role, category_id, type) //
     }
     return false; // by default 
 }
-//IMPORTANT NEED TO SET UP TABLE BEFORE ACCESS CONTROL
-let bate = findRole();
-console.log(bate);
-//                   operation, element, role, category_id, type
-let temp = hasAccess('read', 'post', 'guest', 1, 1);
-if(temp)
+
+function testAC()
 {
-    console.log("ACCESS GRANTED!");
+    let operations = ['read','create','update','delete'];
+    let elements = ['category', 'post', 'reply'];
+    let roles = ['guest','user','member', 'moderator', 'admin'];
+    let i = 0
+    for(i; i < roles.length; i++)
+    {
+        let j = 0
+        for(j; j < operations.length; j++)
+        {
+            let k = 0
+            for(k; k < elements.length; k++)
+            {
+                //hasAccess(operation, element, role, category_id, type)
+                let tempp = hasAccess(operations[j], elements[k], roles[i], 1, 1);
+                console.log(roles[i], operations[j], elements[k], tempp);
+            }
+        }
+    }
 }
-else
-{
-    console.log("ACCESS DENIED!");
-}
 
-
-// // https://www.techiediaries.com/node-sqlite-crud/
-// function readsql() {
-//     console.log("Read data from basicposts");
-//     db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
-//         rows.forEach(function (row) {
-//             console.log(row.id + ": " + row.title + "; " + row.date + "; " + row.content);
-//         });
-//     });
-// }
-
-// function newpostHandler(req, res, next) {
-//     // let url = req.url;
-//     // let qObj = req.query;
-//     // console.log(qObj);
-//     // console.log(typeof(req));
-//     // console.log()
-//     let title = SqlString.escape(req.body.title);
-//     let content = SqlString.escape(req.body.content);
-//     let datetime = new Date(); //.toUTCString();
-//     datetime = SqlString.escape(datetime);
-//     console.log(req.body, req.body.title, req.body.content);
-
-//     db.run('INSERT INTO basicposts(title, date, content) VALUES (?, ?, ?)', [title, datetime, content]);
-
-//     readsql();
-
-//     res.send("done!");
-// }
-
-// function getpostsHandler(req, res, next) {
-    
-//     db.all("SELECT rowid AS id, title, date, content FROM basicposts", function(err, rows) {
-//         res.send(rows);
-//     });
-
-// }
-
-// function clearpostsHandler(req, res, next) {
-    
-//     db.all("DELETE FROM basicposts");
-//     res.send("done!");
-
-// }
+//testAC();
 
 // ===============================================================================
 
@@ -379,7 +370,15 @@ passport.deserializeUser(function(id, cb) {
 function newcategory (req, res, next) {
     // Create new category
     // /newcategory?categoryname=___&public=___
-
+// AccessControl(tempuserid, qobj.categoryname, function(canaccess){
+//    if (canaccess) {
+//    }
+//    else {
+//        res.send("permission denied");
+//        console.log("permission denied");
+//        next();
+//    }
+// });
     let qobj = req.query;
     if (qobj.categoryname != undefined && qobj.public != undefined) {
         // category name should be alpha only
@@ -536,7 +535,7 @@ function deletepost (req, res, next) {
 function getpost (req, res, next) { // ################################fix string
     // Get post (and replies)
     // /getpost?categoryid=___&postid=___
-
+    console.log("I am in get post!");
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
         // categoryid should be int only
@@ -633,6 +632,7 @@ function getuserroles(userid, cb) {
     });
 }
 
+
 function getuserprofile (req, res, next) {
     // could be handled by the session cookie, but don't. 
     // need to check if user is able to get info on userid
@@ -641,7 +641,7 @@ function getuserprofile (req, res, next) {
 
     let qobj = req.query;
     if (qobj.userid != undefined) {
-        console.log("finding user " + qobj.userid);
+        // console.log("finding user " + qobj.userid);
 
         users.find_userid(qobj.userid, db, function(err, row) {
             // console.log(err, row);
@@ -650,7 +650,7 @@ function getuserprofile (req, res, next) {
                 res.send(null);
             }
             else if(row == null) {
-                console.log("no users found")
+                // console.log("no users found")
                 res.send(null);
             }
             else {
@@ -699,7 +699,7 @@ function getauthor( req, res, next ) {
     // getauthor?userid=___
     let qobj = req.query;
     if (qobj.userid != undefined) {
-        console.log("finding user " + qobj.userid);
+        // console.log("finding user " + qobj.userid);
 
         users.find_userid(qobj.userid, db, function(err, row) {
             // console.log(err, row);
@@ -708,7 +708,7 @@ function getauthor( req, res, next ) {
                 res.send(null);
             }
             else if(row == null) {
-                console.log("no users found")
+                // console.log("no users found")
                 res.send(null);
             }
             else {
@@ -834,3 +834,50 @@ const server = app.listen(process.env.PORT || port, () => {
 });
 
 module.exports = app;
+
+
+/*
+function checkAccess(user_id, category_id)
+{
+    users.find_userid(user_id, db, function(err, row) {
+        console.log(row);
+        if(row == null)
+        {
+            user_role = 'guest';
+            //function hasAccess(operation, element, user_role, type)
+            //hasAccess(operation, element, user_role, 1)
+        }
+        else if (row.role === 1)
+            user_role = 'admin';
+
+        else // if user is not guest or admin, get role from roles
+        {
+             getSingleRole(user_id, category_id, function(roles_err, roles_row) {
+                if(roles_err)
+                    console.log("finding roles error");
+                else
+                {
+                    if(roles_row == null)
+                        user_role = 'user';
+                    else if (roles_row.role == 1)
+                        user_role = 'member';
+                    else if (roles_row.role == 2)
+                        user_role = 'moderator'
+                    console.log(roles_row);
+                }
+                //AC func
+            });
+        }
+    });
+    //function getuserroles(userid, cb)
+    // check if user is admin, if it is retrun admin
+    // if not check it is a moderator, or member(user) of a private function
+
+    //DONE if user_id not in usr database, return guest
+    //DONE if user_id in usr data base and is admin, return admin
+    //if user_id in usr data base but not in category database, return user
+    //if user_id in both usr and category databasem return memeber
+    //      a memebr has the same privs. as user inside the private 
+    //if user_id inside category and is a moderator, return moderator
+}
+*/
