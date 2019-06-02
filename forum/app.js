@@ -93,12 +93,25 @@ passport.deserializeUser(function(id, cb) {
 // ============================================================================
 
 
+/*accesscontrol.checkAccess() function takes in user_id and the appropriate element
+    to be modified as well as the requested by the user operation.
+
+    ***IMPORTANT***
+    - when you need to check access for operations on a category, input -1 
+        for both reply_id and post_id.
+    - when you need to check acccess for operation on a post, input -1 for reply_id.
+    - when you need to check acceess for operation on a reply, input all required vars.
+    *user_id, cat_id, oper, elem can be removed form the callback, they are only included
+            for testing purposes
+*/
+
+/*This is just a function to test the correctness of checkAccess() function */
 function testCheckAC()
 {
     let operations = ['read','create','update','delete'];
     let elements = ['category', 'post', 'reply'];
     let user_ids = [1,2,3,4];
-    let category_ids = [1,2, 3];
+    let category_ids = [1,2, 4];
     let i = 0;
     for(i; i < category_ids.length; i++)
     {
@@ -108,13 +121,11 @@ function testCheckAC()
             let k = 0;
             for(k; k < elements.length; k++)
             {
-                //console.log(1, category_ids[i], operations[j], elements[k]);
-                //user_id, category_id, post_id, reply_id, operation, element, cb
-                // accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
-                //     if(accessGranted) {
-                //         console.log(usr_id, cat_id, oper, elm, accessGranted);
-                //     }
-                // }); 
+                // checkAccess(user_id, category_id, post_id, reply_id, operation, element, cb)
+                accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
+                     if(accessGranted)
+                        console.log(usr_id, cat_id, oper, elm, accessGranted);
+                }); 
             }
         }
     }
@@ -304,16 +315,14 @@ function getcategoryposts (req, res, next) {
                 let sqlquery = "SELECT * FROM posts WHERE category_id=" + qobj.categoryid;
 
                 db.all(sqlquery, function(err, rows) {
-                    res.send(rows);
-                    
+                    res.send(rows);  
                 });
             }
             else {
                 res.status(401);
                 res.send("Unauthorized: Private category");
             }
-        });
-        
+        });  
     }
     else {
         console.log("Undefined");

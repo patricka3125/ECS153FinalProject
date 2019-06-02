@@ -216,10 +216,14 @@ exports.checkAccess = function(user_id, category_id, post_id, reply_id, operatio
                                     user_role = 'member';
                                 else if (roles_row.role == 2) //if moderator, then must own the category with category_id
                                     user_role = 'moderator';
-                                if(categories_row == null)
-                                    console.log("category doesn't exist");
-                                else
+                                if(categories_row != null)
                                     category_type = categories_row.public;
+                                 // if category doesn't exist the only operation allowed is create new category!
+                                else if(operation !== 'create' && element !== 'category')
+                                {
+                                    console.log("category doesn't exist");
+                                    return false;
+                                }
                                 //check if the user owns the post/reply they are trying to edit/delete
                                 if((operation === 'update' || operation === 'delete') && (element === 'post' || element === 'reply')) {
                                     if(!condition && user_role !== 'admin' && operation === 'delete') {
