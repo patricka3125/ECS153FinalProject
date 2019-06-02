@@ -174,9 +174,8 @@ function newcategory (req, res, next) {
             currentuser = req.user.id;
         } 
         //user_id, category_id, post_id, reply_id, operation, element, cb
-        //TODO: need to remove the entres in roles for the deleted categories
         accesscontrol.checkAccess(currentuser, -1, -1, -1, 'create', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
-            console.log(accessGranted);
+            //console.log(accessGranted);
             if(accessGranted)
             {
                 //console.log(usr_id, cat_id, oper, elm, accessGranted);
@@ -194,8 +193,6 @@ function newcategory (req, res, next) {
                     db.all(sqlquery, function(err, rows) {
                         newcategoryid = rows[0].category_id;
                         sqlquery = "INSERT INTO roles(user_id, category_id, role) VALUES(?, ?, ?)";
-                        // TODO: need to fix roles db to fit the AC, where only 1 moderator(owner) and memebers
-                        // so in this case since the user owns the category he will be moderator=2
                         db.run(sqlquery, [req.user.id, newcategoryid, 1], function(err) { // 1=owner
                             res.send(myresult);
                         });
@@ -223,24 +220,35 @@ function deletecategory (req, res, next) {
     let qobj = req.query;
     if (qobj.categoryid != undefined) {
         // categoryid should be int only
-
-        let sqlquery = "DELETE FROM categories WHERE category_id=" + qobj.categoryid;
-
-        // also do:
-        // let sqlquery = "DELETE FROM posts WHERE category_id=?";
-        // let sqlquery = "DELETE FROM replies WHERE category_id=?";
-
-        let myresult = "deleted";
-
-        db.run(sqlquery, function(err) {
-            sqlquery = "DELETE FROM posts WHERE category_id=" + qobj.categoryid;
-            db.run(sqlquery, function(err) {
-                sqlquery = "DELETE FROM replies WHERE category_id=" + qobj.categoryid;
-                db.run(sqlquery);
-            });
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, -1, -1, -1, 'create', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            //console.log(accessGranted);
+            if(accessGranted)
+            {
+                let sqlquery = "DELETE FROM categories WHERE category_id=" + qobj.categoryid;
+                let myresult = "deleted";
+                db.run(sqlquery, function(err) {
+                    sqlquery = "DELETE FROM posts WHERE category_id=" + qobj.categoryid;
+                    db.run(sqlquery, function(err) {
+                        sqlquery = "DELETE FROM replies WHERE category_id=" + qobj.categoryid;
+                        db.run(sqlquery, function(err) {
+                            sqlquery = "DELETE FROM roles WHERE category_id=" + qobj.categoryid;
+                            db.run(sqlquery);
+                        });
+                    });
+                });
+                res.send(myresult);
+            }
+            else
+            {
+                //add apropriate status
+                //res.status(401);
+                res.send("Category: failed to delete");
+            }
         });
-
-        res.send(myresult);
     }
     else {
         console.log("Undefined");
