@@ -107,9 +107,9 @@ ac.grant('user')
     .grant('moderator')
         //ONLY ONE MODERATOR PER CATEGORY!
         .extend('user')
-        .deleteAny('post')
         .deleteOwn('category')
         .updateOwn('category') 
+        .deleteAny('post')
         .deleteAny('reply')
     .grant('admin')
         .extend('moderator')
@@ -153,12 +153,12 @@ function getSinglePost(categoryid, post_id, user_id, cb) {
 }
 
 /*
-getSinglePost(4, 3, 2, function(posts_err, posts_row) {
+getSinglePost(1, 1, 2, function(posts_err, posts_row) {
     if(posts_err)
         console.log("Error! Can't find posts!");
     else
     {
-        console.log(posts_row);
+        console.log("Batence" , posts_row);
     }
 });
 */
@@ -186,7 +186,7 @@ getSingleReply(4, 3, 2, 6, function(replies_err, replies_row) {
 });
 */
 
-function checkOwnership(category_id, post_id, user_id, reply_id, cb)
+function checkOwnership(category_id, user_id, post_id, reply_id, cb)
 {
     if(reply_id === -1)
     {
@@ -195,13 +195,14 @@ function checkOwnership(category_id, post_id, user_id, reply_id, cb)
                 console.log("Error! Can't find posts!");
             else
             {
-                console.log(posts_row);
+                //console.log(posts_row);
                 if(posts_row == null)
                     cb(false);
                 else
                     cb(true);
             }
         });
+        return;
     }
     else
     {
@@ -228,7 +229,7 @@ function checkOwnership(category_id, post_id, user_id, reply_id, cb)
 
 
 
-function checkAccess(user_id, category_id, operation, element, cb)
+function checkAccess(user_id, category_id, post_id, reply_id, operation, element, cb)
 {
     users.find_userid(user_id, db, function(users_err, users_row) {
         if(users_err)
@@ -247,7 +248,8 @@ function checkAccess(user_id, category_id, operation, element, cb)
                             console.log("Error! Can't find categories!");
                         else
                         {
-                            checkOwnership(4, 3, 7, 6, function(condition) {
+                            //category_id, user_id, post_id reply_id, cb
+                            checkOwnership(category_id, user_id, post_id, reply_id, function(condition) {
                                 //console.log(condition);
                             
                                 //console.log(users_row);
@@ -268,29 +270,44 @@ function checkAccess(user_id, category_id, operation, element, cb)
                                 else
                                     category_type = categories_row.public;
 
-                                //check if the user owns the pos/reply they are trying to edit/delete
-                                if((operation === 'update' || operation === 'delete') && (element === 'post' || element === 'reply'))
+                                //check if the user owns the post/reply they are trying to edit/delete
+                                if((operation === 'delete') && (element === 'post' || element === 'reply'))
                                 {
-                                    if(!condition)
+                                    if(!condition && user_role !== 'admin')
                                     {
-                                        //console.log("condition",condition)
-                                        cb(false);
+                                        //console.log(condition);
+                                        let acg = false;
+                                        cb(user_id, category_id, operation, element, acg);
                                         return;
                                     }
                                     //if inside here, return false, aka make cb false
                                 } // when execution goes beyond this if statement
 
-                                //at this point non eed to check ownership, post/reply figured out and the category
+                                                                //check if the user owns the post/reply they are trying to edit/delete
+                                if((operation === 'update') && (element === 'post' || element === 'reply' ))
+                                {
+                                    if(!condition)
+                                    {
+                                        //console.log(condition);
+                                        let acg = false;
+                                        cb(user_id, category_id, operation, element, acg);
+                                        return;
+                                    }
+                                    //if inside here, return false, aka make cb false
+                                } // when execution goes beyond this if statement
+                                else if(operation === 'update' && element === 'category' && roles_row != null) // special case when admin owns a category a and wants to edit.
+                                {                                                           // only the moderator of a category can change it !!!!
+                                    if(roles_row.role === 2)
+                                        user_role = 'moderator';
+                                }
+
+
+                                //at this point no need to check ownership, post/reply figured out and the category
                                 // ownership is figured out in hasAccess
-                                let accessGranted = hasAccess(operation, element, user_role, category_type);
-                                //console.log("access" ,accessGranted);
-
-                                //if operation is update and element is post or reply
-                                //  check ownership, if none return false
-
-                                //if operation is delete and element is post or reply 
-                                // check ownership, if none return false
-                                cb(accessGranted);
+                                //operation, element, user_role, post_id, reply_id, category_type
+                                let accessGranted = hasAccess(operation, element, user_role, post_id, reply_id, category_type);
+                                //console.log(accessGranted, "Bate Boiko");
+                                cb(user_id, category_id, operation, element, accessGranted);
                             });
                         }
                     });
@@ -309,44 +326,48 @@ function testCheckAC()
     let operations = ['read','create','update','delete'];
     let elements = ['category', 'post', 'reply'];
     let user_ids = [1,2,3,4];
-    let category_ids = [1,2];
-    let i1 = 0;
-    for(i1; i1 < user_ids.length; i1++)
+    let category_ids = [1,2, 3];
+    let i = 0;
+    for(i; i < category_ids.length; i++)
     {
-        let i2 = 0;
-        for(i2; i2 < category_ids.length; i2++)
+        let j = 0;
+        for(j; j < operations.length; j++)
         {
-            let j = 0;
-            for(j; j < operations.length; j++)
+            let k = 0;
+            for(k; k < elements.length; k++)
             {
-                let k = 0;
-                for(k; k < elements.length; k++)
-                {
-                    //checkAccess(user_id, category_id, operation, element, cb)
-                    console.log(user_ids[i1], category_ids[i2], operations[j], elements[k]);
-                    checkAccess(user_ids[i1], category_ids[i2], operations[j], elements[k], function(accessGranted) {
-                        console.log(accessGranted);
-                    }); 
-                }
+                //user_id, category_id, post_id, reply_id, operation, element, cb
+                //console.log(1, category_ids[i], operations[j], elements[k]);
+                checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], function(usr_id, cat_id, oper, elm, accessGranted) {
+                    if(accessGranted)
+                        console.log(usr_id, cat_id, oper, elm, accessGranted);
+                }); 
             }
         }
     }
 }
-
+// tested admin 
+//        - update when owns/doesn't own reply +
+//        - update when owns/doesn't own post +
+//        - update when owns/doesn't own category +
+//      guest
+//        - so far works good but still need to test
+//      moderator
+//        - update when owns/doesn't own reply +
+//        - update when owns/doesn't own post +
+//        - update when owns/doesn't own category +
+//      user
+//        - update when owns/doesn't own reply -
+//        - update when owns post +
+//        - update when owns/doesn't own category +
 testCheckAC();
 
 
 
 //usr id (GLOBAL), userInfo(db), categoryInfo(db), 
 //FINAL USER ROLES: guest, user, moderator, admin
-function hasAccess(operation, element, user_role, type)
+function hasAccess(operation, element, user_role, post_id, reply_id, category_type)
 {
-    //need to get user role!!! (ONLY ONCE)
-    //inside user role, if user is not listed inside categories data
-    // base he is treated like a guest to the category!!!! 
-    //findRole, checks the users role in the category
-    let category_type = type
-
     if(operation === 'read')
     {
         if (category_type === 1) //if public
@@ -392,12 +413,10 @@ function hasAccess(operation, element, user_role, type)
             return false;
         if(element === 'category')
         { 
-            if(user_role === 'member')
-                user_role = 'user';
+            if(user_role === 'member' || user_role === 'admin')
+                return false; // only if moderator or admin(who owns a category)
             //findRole, checks the users role in the category
-            const permission = (user_role === 'moderator')
-                   ? ac.can(user_role).updateOwn('category') // if moderator then update own
-                   : ac.can(user_role).updateAny('category'); // if not moderator check if admin
+            const permission = ac.can(user_role).updateOwn('category'); // if moderator then update own
             //NEED TO UPDATE USER TO MODERATOR on categ. creation
             return permission.granted;
         }
@@ -411,10 +430,19 @@ function hasAccess(operation, element, user_role, type)
                     user_role = 'user';
                 //if admin or moderator check Any, else check Own(ownership is figured out in checkAccess)
                 // the ownership of the category for a moderator is figured out in checkAccess
-                const permission = (user_role === 'admin' || user_role === 'moderator')
-                    ? ac.can(user_role).updateAny(element)
-                    : ac.can(user_role).updateOwn(element);
-                return permission.granted;
+                if(reply_id === -1 && element === 'post')
+                {
+                    const permission = ac.can(user_role).updateOwn('post');
+                    console.log("zashto taka1?", user_role, element, permission.granted);
+                    return permission.granted;
+                }
+                else if(reply_id !== -1 && element === 'reply')
+                {
+                    const permission = ac.can(user_role).updateOwn('reply');
+                    console.log("zashto taka?", user_role, element, permission.granted);
+                    return permission.granted;
+                }
+                return false;
             }
         }
     }
@@ -442,10 +470,24 @@ function hasAccess(operation, element, user_role, type)
                     user_role = 'user';
                 //if admin or moderator check Any, else check Own(ownership is figured out in checkAccess)
                 // the ownership of the category for a moderator is figured out in checkAccess
-                const permission = (user_role === 'admin' || user_role === 'moderator')
-                    ?ac.can(user_role).deleteAny(element)
-                    :ac.can(user_role).deleteOwn(element);
-                return permission.granted;
+                console.log(reply_id, "reply_id");
+                if(reply_id === -1 && element === 'post')
+                {
+                    const permission = (user_role === 'admin' || user_role === 'moderator')
+                        ?ac.can(user_role).deleteAny('post')
+                        :ac.can(user_role).deleteOwn('post');
+                    return permission.granted;
+                }
+                else if (reply_id !== -1 && element === 'reply')
+                {
+                    const permission = (user_role === 'admin' || user_role === 'moderator')
+                        ?ac.can(user_role).deleteAny('reply')
+                        :ac.can(user_role).deleteOwn('reply');
+                    return permission.granted;
+                }
+                else
+                    return false;
+
             }
         }
     }
