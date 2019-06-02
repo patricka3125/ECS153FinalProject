@@ -110,10 +110,11 @@ function testCheckAC()
             {
                 //console.log(1, category_ids[i], operations[j], elements[k]);
                 //user_id, category_id, post_id, reply_id, operation, element, cb
-                accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
-                    if(accessGranted)
-                        console.log(usr_id, cat_id, oper, elm, accessGranted);
-                }); 
+                // accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
+                //     if(accessGranted) {
+                //         console.log(usr_id, cat_id, oper, elm, accessGranted);
+                //     }
+                // }); 
             }
         }
     }
@@ -152,8 +153,9 @@ function newcategory (req, res, next) {
 // });
 
 // TODO: add creator into owner role
+
     //user_id, category_id, post_id, reply_id, operation, element, cb
-    checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], function(usr_id, cat_id, oper, elm, accessGranted) {
+    accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], function(usr_id, cat_id, oper, elm, accessGranted) {
         if(accessGranted)
             console.log(usr_id, cat_id, oper, elm, accessGranted);
     }); 
@@ -231,11 +233,58 @@ function getcategorynames (req, res, next) {
 
 // TODO: if logged in -> get public + member ones
 //       if guest     -> get public only
+    
     let sqlquery = "SELECT * FROM categories";
 
-    db.all(sqlquery, function(err, rows) {
-        res.send(rows);
-    });
+    if(req.isAuthenticated()) {
+        // get public + member categories
+        db.all(sqlquery, function(err, rows) {
+            getuserroles(req.user.id, function(roles_err, roles_rows) {
+                if(roles_err) {
+                    console.log("finding roles error");
+                    res.send(null);
+                }
+                else {
+                    let parsedrolestable = parse_userrolestable(roles_rows);
+                    let myresult = {"id": req.user.id, "username": req.user.username, "role": req.user.role};
+                    myresult = Object.assign({}, myresult, parsedrolestable);
+
+                    // myresult = parse_userrolestable(roles_rows);
+                    console.log(myresult);
+                    checkedrows = [];
+
+                    for(let i = 0; i < rows.length; i++) {
+                        currentid = rows[i].category_id;
+                        if( myresult.owned_categories.includes(currentid) ||
+                            myresult.moderator_categories.includes(currentid) || 
+                            myresult.user_categories.includes(currentid) || 
+                            rows[i].public == 1 ||
+                            req.user.role == 1
+                            ) {
+                            checkedrows.push(rows[i]);
+                        }
+                    }
+                    
+                    res.send(checkedrows);
+                }
+            });
+
+            // res.send(rows);
+        });
+
+    }
+    else {
+        // get public categories
+        sqlquery += " WHERE public=1";
+        db.all(sqlquery, function(err, rows) {
+            res.send(rows);
+        });
+    }
+    
+
+    // db.all(sqlquery, function(err, rows) {
+    //     res.send(rows);
+    // });
 }
 
 function getcategoryposts (req, res, next) {
@@ -246,11 +295,25 @@ function getcategoryposts (req, res, next) {
     if (qobj.categoryid != undefined) {
         // categoryid should be int only
 
-        let sqlquery = "SELECT * FROM posts WHERE category_id=" + qobj.categoryid;
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, null, null, "read", null, db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            if(accessGranted) {
+                let sqlquery = "SELECT * FROM posts WHERE category_id=" + qobj.categoryid;
 
-        db.all(sqlquery, function(err, rows) {
-            res.send(rows);
+                db.all(sqlquery, function(err, rows) {
+                    res.send(rows);
+                    
+                });
+            }
+            else {
+                res.status(401);
+                res.send("Unauthorized: Private category");
+            }
         });
+        
     }
     else {
         console.log("Undefined");
@@ -432,6 +495,25 @@ function getuserroles(userid, cb) {
     });
 }
 
+function parse_userrolestable(roles_rows) {
+    let owned_categories = [];
+    let moderator_categories = [];
+    let user_categories = [];
+
+    for(let i = 0; i < roles_rows.length; i++) {
+        if (roles_rows[i].role == 1) {// owner
+            owned_categories.push(roles_rows[i].category_id);
+        }
+        else if (roles_rows[i].role == 2) {// moderator
+            moderator_categories.push(roles_rows[i].category_id);
+        }
+        else if (roles_rows[i].role == 3) {// user
+            user_categories.push(roles_rows[i].category_id);
+        }
+    }
+    let myresult = {"owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
+    return myresult;
+}
 
 function getuserprofile (req, res, next) {
     // could be handled by the session cookie, but don't. 
@@ -463,23 +545,11 @@ function getuserprofile (req, res, next) {
                         res.send(null);
                     }
                     else {
-                        let owned_categories = [];
-                        let moderator_categories = [];
-                        let user_categories = [];
+                        let parsedrolestable = parse_userrolestable(roles_rows);
 
-                        for(let i = 0; i < roles_rows.length; i++) {
-                            if (roles_rows[i].role == 1) {// owner
-                                owned_categories.push(roles_rows[i].category_id);
-                            }
-                            else if (roles_rows[i].role == 2) {// moderator
-                                moderator_categories.push(roles_rows[i].category_id);
-                            }
-                            else if (roles_rows[i].role == 3) {// user
-                                user_categories.push(roles_rows[i].category_id);
-                            }
-                        }
-                        let myresult = {"id": row.id,"username": row.username, "role": row.role, "owned_categories": owned_categories, "moderator_categories": moderator_categories, "user_categories": user_categories};
-                        // console.log("sending: ", myresult);
+                        let myresult = {"id": row.id,"username": row.username, "role": row.role};
+                        myresult = Object.assign({}, myresult, parsedrolestable);
+                        
                         res.send(myresult);
                     }
                 });

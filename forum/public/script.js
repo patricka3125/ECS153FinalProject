@@ -284,6 +284,12 @@ function createcategory() {
 		console.log(responseStr, status);
 		// window.location.reload(false); 
 		newname.value = "";
+
+		// get permission for new category
+		getuserprofile(function(userprofile) {
+			global_userprofile = userprofile;
+			getcategories("default");
+		});
 		getcategories(currentcategory);
 	};
 
