@@ -213,6 +213,10 @@ function newcategory (req, res, next) {
     }
 }
 
+// accesscontrol.checkAccess(2, 13, -1, -1, 'delete', 'category', db, function(user_id,cat_id, oper, elm, accessGranted) {
+//     console.log("Test case is: ", accessGranted); 
+// });
+
 function deletecategory (req, res, next) {
     // Delete category:
     // /deletecategory?categoryid=___
@@ -224,8 +228,9 @@ function deletecategory (req, res, next) {
         if(req.isAuthenticated()) {
             currentuser = req.user.id;
         } 
-        accesscontrol.checkAccess(currentuser, -1, -1, -1, 'create', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
-            //console.log(accessGranted);
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
             if(accessGranted)
             {
                 let sqlquery = "DELETE FROM categories WHERE category_id=" + qobj.categoryid;
@@ -247,6 +252,9 @@ function deletecategory (req, res, next) {
                 //add apropriate status
                 //res.status(401);
                 res.send("Category: failed to delete");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
+
             }
         });
     }
@@ -355,19 +363,36 @@ function newpost (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined) {
-        let sqlquery = "INSERT INTO posts(category_id, date_created, title, content, user_id) VALUES(?, ?, ?, ?, ?)";
-        
-        let new_title = SqlString.escape(req.body.title);
-        let new_content = SqlString.escape(req.body.content);
-        let new_datetime = new Date(); 
-        new_datetime = SqlString.escape(new_datetime);
+        // categoryid should be int only
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'create', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted)
+            {
+                let sqlquery = "INSERT INTO posts(category_id, date_created, title, content, user_id) VALUES(?, ?, ?, ?, ?)";
+                let new_title = SqlString.escape(req.body.title);
+                let new_content = SqlString.escape(req.body.content);
+                let new_datetime = new Date(); 
+                new_datetime = SqlString.escape(new_datetime);
+                let myresult = "inserted";
+                db.run(sqlquery, [qobj.categoryid, new_datetime, new_title, new_content, req.user.id]);
+                console.log("creating: ", qobj.categoryid, new_datetime, new_title, new_content);
+                res.send(myresult);
+            }
+            else
+            {
+                //add apropriate status
+                //res.status(401);
+                res.send("Post: failed to create");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
 
-        let myresult = "inserted";
-
-        db.run(sqlquery, [qobj.categoryid, new_datetime, new_title, new_content, req.user.id]);
-
-        console.log("creating: ", qobj.categoryid, new_datetime, new_title, new_content);
-        res.send(myresult);
+            }
+        });
     }
     else {
         console.log("Undefined");
@@ -403,15 +428,33 @@ function deletepost (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "DELETE FROM posts WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
-        let myresult = "deleted";
+                // categoryid should be int only
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted)
+            {
+                let sqlquery = "DELETE FROM posts WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
+                let myresult = "deleted";
+                db.run(sqlquery);
+                sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
+                db.run(sqlquery);
+                res.send(myresult);
+            }
+            else
+            {
+                //add apropriate status
+                //res.status(401);
+                res.send("Post: failed to delete");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
 
-        db.run(sqlquery);
-
-        sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
-        db.run(sqlquery);
-
-        res.send(myresult);
+            }
+        });
     }
     else {
         console.log("Undefined");

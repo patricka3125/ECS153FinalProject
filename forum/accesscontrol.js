@@ -154,6 +154,7 @@ function hasAccess(operation, element, user_role, post_id, reply_id, category_ty
             const permission = (user_role === 'owner')
                    ? ac.can(user_role).deleteOwn('category') // if owner then delete own
                    : ac.can(user_role).deleteAny('category'); // if not admin can delete any
+            return permission.granted;
         }
         else { // element is either a post or a reply
             if (category_type === 0 && user_role === 'user')
