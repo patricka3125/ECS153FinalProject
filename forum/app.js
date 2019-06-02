@@ -164,40 +164,51 @@ function newcategory (req, res, next) {
 // });
 
 // TODO: add creator into owner role
-
-    //user_id, category_id, post_id, reply_id, operation, element, cb
-    accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], function(usr_id, cat_id, oper, elm, accessGranted) {
-        if(accessGranted)
-            console.log(usr_id, cat_id, oper, elm, accessGranted);
-    }); 
     let qobj = req.query;
     if (qobj.categoryname != undefined && qobj.public != undefined) {
         // category name should be alpha only
         // public should be boolean only
 
-        let sqlquery = "INSERT INTO categories(title, public) VALUES(?, ?)";
-        let myresult = "inserted";
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        //TODO: need to remove the entres in roles for the deleted categories
+        accesscontrol.checkAccess(currentuser, -1, -1, -1, 'create', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log(accessGranted);
+            if(accessGranted)
+            {
+                //console.log(usr_id, cat_id, oper, elm, accessGranted);
+                let sqlquery = "INSERT INTO categories(title, public) VALUES(?, ?)";
+                let myresult = "inserted";
 
-        console.log(qobj.categoryname, qobj.public);
+                console.log(qobj.categoryname, qobj.public);
 
-        // create the new category
-        db.run(sqlquery, [qobj.categoryname, qobj.public], function(err) {
+                // create the new category
+                db.run(sqlquery, [qobj.categoryname, qobj.public], function(err) {
 
-            // get the new category's id
-            sqlquery = "SELECT category_id FROM categories WHERE title='" + qobj.categoryname +"'";
+                    // get the new category's id
+                    sqlquery = "SELECT category_id FROM categories WHERE title='" + qobj.categoryname +"'";
 
-            db.all(sqlquery, function(err, rows) {
-                newcategoryid = rows[0].category_id;
-                sqlquery = "INSERT INTO roles(user_id, category_id, role) VALUES(?, ?, ?)";
-
-                db.run(sqlquery, [req.user.id, newcategoryid, 1], function(err) { // 1=owner
-                    res.send(myresult);
+                    db.all(sqlquery, function(err, rows) {
+                        newcategoryid = rows[0].category_id;
+                        sqlquery = "INSERT INTO roles(user_id, category_id, role) VALUES(?, ?, ?)";
+                        // TODO: need to fix roles db to fit the AC, where only 1 moderator(owner) and memebers
+                        // so in this case since the user owns the category he will be moderator=2
+                        db.run(sqlquery, [req.user.id, newcategoryid, 1], function(err) { // 1=owner
+                            res.send(myresult);
+                        });
+                    });
                 });
-
-            });
-
+            }
+            else
+            {
+                //add apropriate status
+                //res.status(401);
+                res.send("Category: failed to create");
+            }
         });
-        
     }
     else {
         console.log("Undefined");

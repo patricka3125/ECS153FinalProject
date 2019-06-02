@@ -1,5 +1,4 @@
 const AccessControl     = require('accesscontrol');
-
 //DEFINING THE ACCESS CONTROL BASIC STRUCTURE, WITHOUT PRIVATE, private is checked later
 //the list of orders could be defined inside a data base as an array, and we can only read it in
 // can be found on the last example https://www.npmjs.com/package/accesscontrol#expressjs-example
@@ -16,9 +15,11 @@ ac.grant('user')
         //ONLY ONE MODERATOR PER CATEGORY!
         .extend('user')
         .deleteOwn('category')
-        .updateOwn('category') 
         .deleteAny('post')
         .deleteAny('reply')
+    .grant('owner')
+        .extend('moderator')
+        .updateOwn('category')
     .grant('admin')
         .extend('moderator')
         .deleteAny('category');
@@ -119,9 +120,9 @@ function hasAccess(operation, element, user_role, post_id, reply_id, category_ty
         if(user_role === 'guest')
             return false;
         if(element === 'category') { 
-            if(user_role === 'member' || user_role === 'admin')
-                return false; // only if moderator or admin(who owns a category)
-            const permission = ac.can(user_role).updateOwn('category'); // if moderator then update own
+            if(user_role === 'admin')
+                return false; // if the user role is admin, it means that they are not owner
+            const permission = ac.can(user_role).updateOwn('category'); // if owner then update category
             return permission.granted;
         }
         else { // element is post or reply
@@ -150,10 +151,9 @@ function hasAccess(operation, element, user_role, post_id, reply_id, category_ty
         if(element === 'category') { 
             if(user_role === 'member')
                 user_role = 'user';
-            const permission = (user_role === 'moderator')
-                   ? ac.can(user_role).deleteOwn('category') // if moderator then update own
-                   : ac.can(user_role).deleteAny('category'); // if not moderator check if admin
-            return permission.granted;
+            const permission = (user_role === 'owner')
+                   ? ac.can(user_role).deleteOwn('category') // if owner then delete own
+                   : ac.can(user_role).deleteAny('category'); // if not admin can delete any
         }
         else { // element is either a post or a reply
             if (category_type === 0 && user_role === 'user')
@@ -164,19 +164,18 @@ function hasAccess(operation, element, user_role, post_id, reply_id, category_ty
                 //if admin or moderator check Any, else check Own(ownership is figured out in checkAccess)
                 // the ownership of the category for a moderator is figured out in checkAccess
                 if(reply_id === -1 && element === 'post') {
-                    const permission = (user_role === 'admin' || user_role === 'moderator')
+                    const permission = (user_role === 'admin' || user_role === 'moderator' || user_role === 'owner')
                         ?ac.can(user_role).deleteAny('post')
                         :ac.can(user_role).deleteOwn('post');
                     return permission.granted;
                 }
                 else if (reply_id !== -1 && element === 'reply') {
-                    const permission = (user_role === 'admin' || user_role === 'moderator')
+                    const permission = (user_role === 'admin' || user_role === 'moderator' || user_role === 'owner')
                         ?ac.can(user_role).deleteAny('reply')
                         :ac.can(user_role).deleteOwn('reply');
                     return permission.granted;
                 }
                 return false;
-
             }
         }
     }
@@ -208,14 +207,16 @@ exports.checkAccess = function(user_id, category_id, post_id, reply_id, operatio
                             checkOwnership(element, category_id, user_id, post_id, reply_id, db, function(condition) {
                                 if(users_row == null)
                                     user_role = 'guest';
-                                else if(users_row.role == 1)
+                                else if(users_row.role === 1)
                                     user_role = 'admin';
                                 else if(roles_row == null)
                                     user_role = 'user';
-                                else if (roles_row.role == 1)
-                                    user_role = 'member';
-                                else if (roles_row.role == 2) //if moderator, then must own the category with category_id
+                                else if (roles_row.role === 1) // 1 owner, 2 moderator, 3 memeber
+                                    user_role = 'owner';
+                                else if (roles_row.role === 2) //if moderator, then must own the category with category_id
                                     user_role = 'moderator';
+                                else if(roles_row.role === 3)
+                                    user_role = 'member'
                                 if(categories_row != null)
                                     category_type = categories_row.public;
                                  // if category doesn't exist the only operation allowed is create new category!
@@ -236,10 +237,11 @@ exports.checkAccess = function(user_id, category_id, post_id, reply_id, operatio
                                     }
                                     //if inside here, return false, aka make cb false
                                 } // when execution goes beyond this if statement
-                                // special case when admin owns a category a and wants to edit.
-                                // only the moderator of a category can change it !!!
+
+                                // special case when admin owns a category and wants to edit.
+                                // only the owner of a category can change it !!!
                                 if(operation === 'update' && element === 'category' && roles_row != null && roles_row.role === 2) 
-                                    user_role = 'moderator';  
+                                    user_role = 'owner';  
                                 //at this point no need to check ownership, post/reply figured out and the category
                                 // ownership is figured out in hasAccess
                                 //operation, element, user_role, post_id, reply_id, category_type
