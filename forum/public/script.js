@@ -66,6 +66,10 @@ function newarticle_editor() {
 	// <textarea id="new_post_content" name="new_content" placeholder="Write something.." style="height:98px;overflow-y:hidden;"></textarea>
 }
 
+function toggle_usersettings() {
+
+}
+
 function toggle_categorysettings(categoryid) {
 	main = document.getElementById("main");
 	main_settings = document.getElementById("main_settings");
@@ -635,9 +639,13 @@ let global_userprofile = null;
 // first get userprofile
 getuserprofile(function(userprofile) {
 	if(userprofile != null) {
-		document.getElementById("user_loginbutton").textContent = "Logged in as " + userprofile.username;
-		document.getElementById("user_loginbutton").setAttribute("onClick", "");
-		document.getElementById("user_loginbutton").classList += "login_static";
+		let user_loginbutton = document.getElementById("user_loginbutton");
+		user_loginbutton.textContent = "Logged in as " + userprofile.username;
+		user_loginbutton.setAttribute("onClick", "");
+		user_loginbutton.classList += "login_static";
+
+		let nav_user_settings = document.getElementById("nav_user_settings");
+		nav_user_settings.classList.remove("hidden");
 	}
 
 	// load:
