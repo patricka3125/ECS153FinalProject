@@ -1,3 +1,11 @@
+// Execute a function when the user releases a key on the keyboard
+document.getElementById("password").addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    login();
+  }
+});
+
 // Create the XHR object.
 function createCORSRequest(method, url) {
 	let xhr = new XMLHttpRequest();

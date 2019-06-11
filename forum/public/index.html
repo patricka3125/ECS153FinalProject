@@ -62,31 +62,35 @@
 				<br>
 				<br>
 				Visibility: <br>
-				<input type="radio" name="gender" value="1" checked="checked"> Public<br>
-				<input type="radio" name="gender" value="0"> Private<br>
+				<input type="radio" name="visibility" value="1" id="visibility_1"> Public<br>
+				<input type="radio" name="visibility" value="0" id="visibility_0"> Private<br>
 
 				<br>
+				<input type="submit" value="Update Visibility" id="updatevisibility" onclick="updatevisibility()"><br>
+
+				<!-- <br>
 				Name: <br>
 				<input type="text" placeholder="Name" value="CategoryName"><br>
 
 				<br>
 				Delete Category: <br>
-				<input type="submit" value="Delete Category"><br>
+				<input type="submit" value="Delete Category"><br> -->
 
 				<br>
 				Users:
-				<table style="border:1px solid white">
-				  <tr>
-				    <th class="tg-0lax">Username</th>
+				<div id="userstable" style="border:1px solid white; "></div>
+				  <!-- <tr>
+				  </tr> -->
+				    <!-- <th class="tg-0lax">Username</th>
 				    <th class="tg-0lax">Type</th>
 				    <th class="tg-0lax">Manage</th>
-				  </tr>
-				  <tr>
+				  </tr> -->
+				  <!-- <tr id="userrow_owner">
 				    <td class="tg-0lax">Jonathan</td>
 				    <td class="tg-0lax">Owner</td>
 				    <td class="tg-0lax"></td>
-				  </tr>
-				  <tr>
+				  </tr> -->
+				  <!-- <tr>
 				    <td class="tg-0lax">Daniel</td>
 				    <td class="tg-0lax">
 				    	<select>
@@ -105,21 +109,24 @@
 						</select>
 				    </td>
 				    <td class="tg-0lax"><input type="button" value="Remove User"></td>
-				  </tr>
-				  <tr>
-				    <td class="tg-0lax"><input type="text" placeholder="Add User" value=""></td>
+				  </tr> -->
+
+				<!-- </table> -->
+				<table id="addrowtable">
+				  <tr id="userrow_add">
+				    <td class="tg-0lax"><input type="text" placeholder="Add User" value="" style="width:100px" id="newusername"></td>
 				    <td class="tg-0lax">
-				    	<select>
-						  <option value="1">Moderator</option>
-						  <option value="2" selected="selected">User</option>
+				    	<select id="newuserrole">
+						  <option value="2">Moderator</option>
+						  <option value="3" selected="selected">User</option>
 						</select>
 				    </td>
-				    <td class="tg-0lax"><input type="button" value="Add User"></td>
+				    <td class="tg-0lax"><input type="button" value="Add User" onclick="adduser()"></td>
 				  </tr>
 				</table>
 
 				<br>
-				<input type="submit" value="Save Settings">
+				<!-- <input type="submit" value="Save Settings"> -->
 			</div>
 			<div class="main_articles" id="main_articles">
 

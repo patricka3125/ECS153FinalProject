@@ -357,6 +357,184 @@ function getcategoryposts (req, res, next) {
     }
 }
 
+function updatevisibility(req, res, next) {
+    // update visibility
+    // /updatevisibility?categoryid=___&visibility=___
+    let qobj = req.query;
+    if (qobj.categoryid != undefined && (qobj.visibility == 0 || qobj.visibility == 1)) {
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can update: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted)
+            {
+                let sqlquery = "UPDATE categories SET public=? WHERE category_id=?";
+
+                db.run(sqlquery, [qobj.visibility, qobj.categoryid], function(err) {
+                    res.send("Updated visibility");
+                });
+            }
+            else {
+                res.status(401);
+                res.send("Visibility: failed to update");
+            }
+        });
+    }
+    else {
+        res.send("Visibility: failed to update");
+        next();
+    }
+
+}
+
+function getcategoryusers(req, res, next) {
+    // get users
+    // /getcategoryusers?categoryid=___
+    let qobj = req.query;
+    if (qobj.categoryid != undefined) {
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'read', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can view users: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted)
+            {
+                // SELECT category_id, user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=4;
+                let sqlquery = " SELECT user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=" + qobj.categoryid;
+
+                db.all(sqlquery, function(err, rows) {
+                    if(err) {
+                        res.send("cannot view users");
+                    }
+                    else {
+                        res.send(rows);
+                    }
+                });
+            }
+            else {
+                res.status(401);
+                // res.send("Visibility: failed to update");
+            }
+        });
+    }
+    else {
+        res.send("cannot view users");
+        next();
+    }
+
+}
+
+function updateuser (req, res, next) {
+    // "/updateuser?categoryid=" + categoryid + "&userid=" + userid + "&role=" + userrole;
+    let qobj = req.query;
+    if(qobj.categoryid != undefined && qobj.userid != undefined && qobj.role != undefined) {
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can updateuser: ",accessGranted);
+            if(accessGranted)
+            {
+                let sqlquery = "UPDATE roles SET role=? WHERE category_id=? AND user_id=?"
+                db.run(sqlquery, [qobj.role, qobj.categoryid, qobj.userid], function(err) {
+                    if(err) console.log("usererror", err);
+                    else {
+                        res.send("updated user");
+                    }
+                });
+            }
+            else {
+                res.status(401);
+                next(); 
+            }
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function removeuser (req, res, next) {
+    // "/removeuser?categoryid=" + categoryid + "&userid=" + userid;
+    let qobj = req.query;
+    if(qobj.categoryid != undefined && qobj.userid != undefined) {
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can deleteuser: ",accessGranted);
+            if(accessGranted)
+            {
+                let sqlquery = "DELETE FROM roles WHERE category_id=? AND user_id=?";
+                db.run(sqlquery, [qobj.categoryid, qobj.userid], function(err) {
+                    if(err) console.log("usererror", err);
+                    else {
+                        res.send("removed user");
+                    }
+                });
+            }
+            else {
+                res.status(401);
+                next(); 
+            }
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
+function adduser (req, res, next) {
+    // "/adduser?categoryid=" + currentcategory + "&username=" + username + "&role=" + userrole;
+    let qobj = req.query;
+    if(qobj.categoryid != undefined && qobj.username != undefined && qobj.role != undefined) {
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can adduser: ",accessGranted);
+            if(accessGranted)
+            {
+                // match username to userid
+                users.find_user(qobj.username, db, function(err, row) {
+                    if(err) {
+                        console.log("finding user error");
+                        res.send("error adding");
+                    }
+                    else if(row == null) {
+                        res.send("error adding");
+                    }
+                    else {
+                        let sqlquery = "INSERT INTO roles(category_id, user_id, role) VALUES(?, ?, ?)";
+                        db.run(sqlquery, [qobj.categoryid, row.id, qobj.role], function(err) {
+                            if(err) console.log("usererror", err);
+                            else {
+                                res.send("added user");
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                res.status(401);
+                next(); 
+            }
+        });
+    }
+    else {
+        console.log("Undefined");
+        next();
+    }
+}
+
 function newpost (req, res, next) {
     // Create new post
     // /newpost?categoryid=___                            [title, content]
@@ -406,7 +584,7 @@ function editpost (req, res, next) { // ################################fix stri
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "UPDATE posts SET title=?, content=? WHERE category_id=? AND post_id=? LIMIT 1";
+        let sqlquery = "UPDATE posts SET title=?, content=? WHERE category_id=? AND post_id=?";
         
         let new_title = SqlString.escape(req.body.title);
         let new_content = SqlString.escape(req.body.content);
@@ -521,7 +699,7 @@ function editreply (req, res, next) { // ################################fix str
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
-        let sqlquery = "UPDATE replies SET content=? WHERE category_id=? AND post_id=? AND reply_id=? LIMIT 1";
+        let sqlquery = "UPDATE replies SET content=? WHERE category_id=? AND post_id=? AND reply_id=?";
         
         let new_content = SqlString.escape(req.body.content);
 
@@ -733,6 +911,12 @@ app.get('/newcategory', newcategory);
 app.get('/deletecategory', deletecategory);
 app.get('/getcategorynames', getcategorynames);
 app.get('/getcategoryposts', getcategoryposts);
+app.get('/updatevisibility', updatevisibility);
+
+app.get('/getcategoryusers', getcategoryusers);
+app.get('/updateuser', updateuser);
+app.get('/removeuser', removeuser);
+app.get('/adduser', adduser);
 
 app.post('/newpost', newpost);
 app.post('/editpost', editpost);

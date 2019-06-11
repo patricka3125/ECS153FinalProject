@@ -196,6 +196,9 @@ function getcategories(categoryid) {
 					global_userprofile["role"] == 1)) {
 					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
 					main_title.appendChild(category_settings);
+
+					// get visibility
+					updatecategorysettings(object[i].category_id, object[i].public);
 				}
 
 				// accesscontrol: create post button
@@ -216,6 +219,9 @@ function getcategories(categoryid) {
 					global_userprofile["role"] == 1)) {
 					let category_settings = createElement(`<i class="material-icons category_settings" onclick="toggle_categorysettings(`+object[i].category_id+`);">settings</i>`);
 					main_title.appendChild(category_settings);
+
+					// get visibility
+					updatecategorysettings(object[i].category_id, object[i].public);
 				}
 
 				// accesscontrol: create post button
@@ -227,8 +233,8 @@ function getcategories(categoryid) {
 			let candelete = "hidden"; // cannot delete
 			if (global_userprofile != null && (
 				global_userprofile["owned_categories"].includes(object[i].category_id) ||
-				global_userprofile["moderator_categories"].includes(object[i].category_id) ||
-				global_userprofile["user_categories"].includes(object[i].category_id) ||
+				// global_userprofile["moderator_categories"].includes(object[i].category_id) ||
+				// global_userprofile["user_categories"].includes(object[i].category_id) ||
 				global_userprofile["role"] == 1)) {
 				candelete = ""; // can delete
 			}
@@ -257,6 +263,20 @@ function getcategories(categoryid) {
 
 	xhr.onerror = function() { alert('error'); };
 	xhr.send();
+}
+
+function updatecategorysettings(categoryid, public) {
+	if(public == 1) {
+		document.getElementById('visibility_1').checked = true;
+	}
+	else {
+		document.getElementById('visibility_0').checked = true;
+	}
+	let updatevisibility = document.getElementById('updatevisibility');
+	updatevisibility.setAttribute( "onClick", "updatevisibility("+categoryid+")" );
+
+	// get users
+	getcategoryusers(categoryid);
 }
 
 function switchcategory(categoryid) {
@@ -317,6 +337,120 @@ function deletecategory(categoryid) {
 	};
 
 	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
+}
+
+function getcategoryusers(categoryid) {
+	let url = "/getcategoryusers?categoryid=" + categoryid;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {throw new Error('CORS not supported');}
+	xhr.onload = function() {
+		let responseStr = xhr.responseText;  // get the JSON string 
+		let object = JSON.parse(responseStr);  // turn it into an object
+		console.log("users:", object);
+
+		let userstable = document.getElementById('userstable');
+		userstablestring = `
+		<table id="userstable">
+		<tr><th>Username</th>
+			<th>Type</th>
+			<th>Manage</th></tr>`;
+
+		// show users
+		for(let i = 0; i < object.length; i++) {
+			if(object[i].role == 1) { // owner
+				userstablestring += `
+				<tr>
+				    <td>`+object[i].username+`</td>
+				    <td>
+				    	Owner
+					</td>
+				    <td></td>
+				 </tr>`;
+				// userrow_temp = createElement(userrow_temp_htmlstring);
+				// userstable.appendChild(userrow_temp);
+
+				// let userrow_owner = document.getElementById('userrow_owner');
+				// userrow_owner.childNodes[1].textContent = object[i].username;
+				// userrow_owner.childNodes[3].textContent = "Owner";
+			}
+			else if(object[i].role == 2) { // moderator
+				userstablestring += `
+				<tr>
+				    <td>`+object[i].username+`</td>
+				    <td>
+				    	<select onchange="updateuser(`+categoryid+`,`+object[i].user_id+`)" id="userrole_`+object[i].user_id+`">
+						  <option value="2" selected="selected">Moderator</option>
+						  <option value="3">User</option>
+						</select>
+					</td>
+				    <td><input type="button" value="Remove User" onclick="removeuser(`+categoryid+`,`+object[i].user_id+`)"></td>
+				 </tr>`;
+				// userrow_temp = createElement(userrow_temp_htmlstring);
+				// userstable.appendChild(userrow_temp);
+			}
+			else if(object[i].role == 3) { // user
+				userstablestring += `
+				<tr>
+				    <td>`+object[i].username+`</td>
+				    <td>
+				    	<select onchange="updateuser(`+categoryid+`,`+object[i].user_id+`)" id="userrole_`+object[i].user_id+`">
+						  <option value="2">Moderator</option>
+						  <option value="3" selected="selected">User</option>
+						</select>
+					</td>
+				    <td><input type="button" value="Remove User" onclick="removeuser(`+categoryid+`,`+object[i].user_id+`)"></td>
+				 </tr>`;
+				// userrow_temp = createElement(userrow_temp_htmlstring);
+				// userstable.appendChild(userrow_temp);
+			}
+		}
+		userstable.innerHTML = userstablestring + "</table>";
+
+		let userrow_add = document.getElementById('userrow_add');
+	};
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+function updateuser(categoryid, userid) {
+	let userrole = document.getElementById("userrole_" + userid).value;
+	let url = "/updateuser?categoryid=" + categoryid + "&userid=" + userid + "&role=" + userrole;
+	
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {throw new Error('CORS not supported');}
+	xhr.onload = function() {
+		console.log("updated user");
+		getcategoryusers(currentcategory);
+	};
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+function removeuser(categoryid, userid) {
+	let url = "/removeuser?categoryid=" + categoryid + "&userid=" + userid;
+
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {throw new Error('CORS not supported');}
+	xhr.onload = function() {
+		console.log("removed user");
+		getcategoryusers(currentcategory);
+	};
+	xhr.onerror = function() { alert('error'); };
+	xhr.send();
+}
+function adduser() {
+	let userrole = document.getElementById("newuserrole").value;
+	let username = document.getElementById("newusername").value;
+	let url = "/adduser?categoryid=" + currentcategory + "&username=" + username + "&role=" + userrole;
+
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) {throw new Error('CORS not supported');}
+	xhr.onload = function() {
+		console.log("added user");
+		document.getElementById("newuserrole").value = 3;
+		document.getElementById("newusername").value = "";
+		getcategoryusers(currentcategory);
+	};
+	xhr.onerror = function() { alert('error'); };
 	xhr.send();
 }
 
@@ -575,6 +709,22 @@ function deletereply(categoryid, postid, replyid) {
 		getposts(categoryid, currentpost);
 	};
 
+	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
+	xhr.send();
+}
+
+function updatevisibility(categoryid) {
+	let visibility = 1;
+	if(document.getElementById('visibility_0').checked) {
+		visibility = 0;
+	}
+	let url = "/updatevisibility?categoryid=" + categoryid + "&visibility=" + visibility;
+	let xhr = createCORSRequest('GET', url);
+	if (!xhr) { throw new Error('CORS not supported');}
+
+	xhr.onload = function() {
+		console.log(xhr.responseText);
+	};
 	xhr.onerror = function() {alert('Woops, there was an error making the request.');};
 	xhr.send();
 }

@@ -12,7 +12,7 @@ exports.find_user = function(username,db,cb) {
 
     // TODO: vulnerable to SQL injection
     let sqlquery = "SELECT * FROM users WHERE username='" + username + "'";
-
+    // console.log(username);
     db.all(sqlquery, function(err, rows) {
         if(err) { cb(err,null); }
         else if(rows.length < 1) {
