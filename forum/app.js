@@ -10,6 +10,7 @@ const passport          = require('passport');
 const LocalStrategy     = require('passport-local').Strategy; //passport local strategy
 const session           = require('express-session');//({ secret: 'mango', resave: false, saveUninitialized: false });
 const path              = require('path');
+const rateLimit         = require("express-rate-limit");
 const port              = 8080;
 const app               = express();
 
@@ -47,9 +48,15 @@ function creationerror(err) {
     }
 }
 
+// ===== Rate Limiter =====
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
 // ========== PASSPORT (Authentication) CODE ==================================
 
-app.use(session({ secret: 'mango', cookie: {secure: false, maxAge: 6 * 60 * 60 * 1000}, resave: false, saveUninitialized: false }));
+app.use(session({ secret: 'mango', cookie: {secure: false, httpOnly: true, maxAge: 6 * 60 * 60 * 1000}, resave: false, saveUninitialized: false }));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -899,7 +906,7 @@ function fileNotFound(req, res) {
     }
 
 // server router
-
+app.use(limiter); // apply to all requests
 app.use(express.static('public'));  // can I find a static file? 
 
 app.use(bodyParser.urlencoded({ extended: false }));
