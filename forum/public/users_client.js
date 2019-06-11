@@ -33,13 +33,16 @@ function signup() {
         let status = xhr.status;
         console.log(responseStr,status);
 
-        if(status == 200) { // success, try to login
+        if(status == 401) { // failure
+            document.getElementById("errormessage").textContent = "Invalid username or password";
+        }
+        else if(status == 200) { // success, try to login
             document.getElementById("form").style.display = "none";
             document.getElementById("box2").style.display = "none";
             document.getElementById("successmessage").style.display = "block";
         }
         else {
-            console.log("error creating");
+            console.log("should not happen");
         }
     };
 

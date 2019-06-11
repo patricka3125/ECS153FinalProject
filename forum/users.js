@@ -1,10 +1,18 @@
+const bcrypt            = require('bcrypt');
+
 exports.add_user = function(username,password,db,cb) {
     if(!db) { cb(new Error('DB does not exist')); }
-
-    let sqlquery = "INSERT INTO users (username, password, role) VALUES(?,?,?)";
-
-    db.run(sqlquery, [username,password,0]); // for now, default role as 0 (non-admin)
-    cb(null);
+    bcrypt.hash(password, 10, function(err, hash) {
+        let sqlquery = "INSERT INTO users (username, password, role) VALUES(?,?,?)";
+        if(err) console.log("error hashing: " + err);
+        console.log("hash: "+hash);
+        db.run(sqlquery, [username,hash,0], function(err) {
+            if(err) cb(err);
+            else cb(null);
+        }); // for now, default role as 0 (non-admin)
+        
+    });
+    
 }
 
 exports.find_user = function(username,db,cb) {
@@ -59,8 +67,10 @@ exports.find_userid = function(userid,db,cb) {
 exports.validate_userpass = function(username,password,db, cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
-    let sqlquery = "SELECT * FROM users WHERE username='" + username
-                   + "' AND password='" + password + "'";
+    let sqlquery = "SELECT * FROM users WHERE username='" + username + "'";// AND password='" + password + "'";
+
+    
+
 
     db.all(sqlquery, function(err, rows) {
         if(err) { 
@@ -70,7 +80,16 @@ exports.validate_userpass = function(username,password,db, cb) {
             cb(err, null);
         }
         else {
-            cb(err, rows[0]);
+            bcrypt.compare(password, rows[0].password, function(err, res) {
+                if(res) {
+                    // Passwords match
+                    delete rows[0].password;
+                    cb(err, rows[0]);
+                } else {
+                    // Passwords don't match
+                    cb(err, null);
+                } 
+            });
         }
     });
 }

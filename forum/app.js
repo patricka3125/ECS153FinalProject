@@ -872,9 +872,13 @@ function create_user(req,res,next) {
     if(username != "" && password != "" && username != null && password != null) {
         users.add_user(username,password,db, 
             function(err) {
-                if(err) { console.log("Error, sign up attempt failed"); }
+                if(err) { 
+                    console.log("Error, sign up attempt failed: " + err); 
+                    res.status(401);
+                    res.send("Sign-Up failed");
+                }
                 else {
-                    console.log("Signed up new user:". username, password);
+                    console.log("Signed up new user:". username);
                     res.send("Sign-Up successful");
                 }
             }
