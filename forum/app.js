@@ -112,49 +112,6 @@ passport.deserializeUser(function(id, cb) {
             for testing purposes
 */
 
-/*This is just a function to test the correctness of checkAccess() function */
-function testCheckAC()
-{
-    let operations = ['read','create','update','delete'];
-    let elements = ['category', 'post', 'reply'];
-    let user_ids = [1,2,3,4];
-    let category_ids = [1,2, 4];
-    let i = 0;
-    for(i; i < category_ids.length; i++)
-    {
-        let j = 0;
-        for(j; j < operations.length; j++)
-        {
-            let k = 0;
-            for(k; k < elements.length; k++)
-            {
-                // checkAccess(user_id, category_id, post_id, reply_id, operation, element, cb)
-                accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
-                     // if(accessGranted)
-                     //    console.log(usr_id, cat_id, oper, elm, accessGranted);
-                }); 
-            }
-        }
-    }
-}
-// tested admin 
-//        - update when owns/doesn't own reply +
-//        - update when owns/doesn't own post +
-//        - update when owns/doesn't own category +
-//      guest
-//        - so far works good but still need to test
-//      moderator
-//        - update when owns/doesn't own reply +
-//        - update when owns/doesn't own post +
-//        - update when owns/doesn't own category +
-//      user
-//        - update when owns/doesn't own reply -
-//        - update when owns post +
-//        - update when owns/doesn't own category +
-testCheckAC();
-
-// ============================================================================
-
 
 // ===== Begin Category Handlers =====
 
@@ -174,8 +131,7 @@ function newcategory (req, res, next) {
         //user_id, category_id, post_id, reply_id, operation, element, cb
         accesscontrol.checkAccess(currentuser, -1, -1, -1, 'create', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             //console.log(accessGranted);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 //console.log(usr_id, cat_id, oper, elm, accessGranted);
                 let sqlquery = "INSERT INTO categories(title, public) VALUES(?, ?)";
                 let myresult = "inserted";
@@ -197,8 +153,7 @@ function newcategory (req, res, next) {
                     });
                 });
             }
-            else
-            {
+            else {
                 //add apropriate status
                 //res.status(401);
                 res.send("Category: failed to create");
@@ -225,8 +180,7 @@ function deletecategory (req, res, next) {
         //user_id, category_id, post_id, reply_id, operation, element, cb
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 let sqlquery = "DELETE FROM categories WHERE category_id=?";
                 let myresult = "deleted";
                 db.run(sqlquery, [qobj.categoryid], function(err) {
@@ -241,8 +195,7 @@ function deletecategory (req, res, next) {
                 });
                 res.send(myresult);
             }
-            else
-            {
+            else {
                 //add apropriate status
                 //res.status(401);
                 res.send("Category: failed to delete");
@@ -323,7 +276,7 @@ function getcategoryposts (req, res, next) {
         if(req.isAuthenticated()) {
             currentuser = req.user.id;
         } 
-        accesscontrol.checkAccess(currentuser, qobj.categoryid, null, null, "read", null, db, function(usr_id, cat_id, oper, elm, accessGranted) {
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, "read", 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             if(accessGranted) {
                 let sqlquery = "SELECT * FROM posts WHERE category_id=?";
 
@@ -356,8 +309,7 @@ function updatevisibility(req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can update: ",accessGranted, "category id is: ",cat_id);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 let sqlquery = "UPDATE categories SET public=? WHERE category_id=?";
 
                 db.run(sqlquery, [qobj.visibility, qobj.categoryid], function(err) {
@@ -388,8 +340,7 @@ function getcategoryusers(req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'read', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can view users: ",accessGranted, "category id is: ",cat_id);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 // SELECT category_id, user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=4;
                 let sqlquery = " SELECT user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=?";
 
@@ -426,8 +377,7 @@ function updateuser (req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can updateuser: ",accessGranted);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 let sqlquery = "UPDATE roles SET role=? WHERE category_id=? AND user_id=?"
                 db.run(sqlquery, [qobj.role, qobj.categoryid, qobj.userid], function(err) {
                     if(err) console.log("usererror", err);
@@ -459,8 +409,7 @@ function removeuser (req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can deleteuser: ",accessGranted);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 let sqlquery = "DELETE FROM roles WHERE category_id=? AND user_id=?";
                 db.run(sqlquery, [qobj.categoryid, qobj.userid], function(err) {
                     if(err) console.log("usererror", err);
@@ -492,8 +441,7 @@ function adduser (req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'update', 'category', db, function(usr_id, cat_id, oper, elm, accessGranted) {
             console.log("Can adduser: ",accessGranted);
-            if(accessGranted)
-            {
+            if(accessGranted) {
                 // match username to userid
                 users.find_user(qobj.username, db, function(err, row) {
                     if(err) {
@@ -542,9 +490,8 @@ function newpost (req, res, next) {
         } 
         //user_id, category_id, post_id, reply_id, operation, element, cb
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'create', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
-            console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
-            if(accessGranted)
-            {
+            console.log("Can create post: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted) {
                 let sqlquery = "INSERT INTO posts(category_id, date_created, title, content, user_id) VALUES(?, ?, ?, ?, ?)";
                 let new_title = SqlString.escape(req.body.title);
                 let new_content = SqlString.escape(req.body.content);
@@ -555,8 +502,7 @@ function newpost (req, res, next) {
                 console.log("creating: ", qobj.categoryid, new_datetime, new_title, new_content);
                 res.send(myresult);
             }
-            else
-            {
+            else {
                 res.status(401);
                 res.send("Post: failed to create");
                 next();
@@ -575,16 +521,28 @@ function editpost (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "UPDATE posts SET title=?, content=? WHERE category_id=? AND post_id=?";
-        
-        let new_title = SqlString.escape(req.body.title);
-        let new_content = SqlString.escape(req.body.content);
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'create', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can edit post: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted) {
+                let sqlquery = "UPDATE posts SET title=?, content=? WHERE category_id=? AND post_id=?";
+                let new_title = SqlString.escape(req.body.title);
+                let new_content = SqlString.escape(req.body.content);
+                let myresult = "edited";
+                db.run(sqlquery, [new_title, new_content, qobj.categoryid, qobj.postid]);
+                res.send(myresult);
+            }
+            else {
+                res.status(401);
+                res.send("Post: failed to edit");
+                next();
+            }
+        });
 
-        let myresult = "edited";
-
-        db.run(sqlquery, [new_title, new_content, qobj.categoryid, qobj.postid]);
-
-        res.send(myresult);
     }
     else {
         console.log("Undefined");
@@ -604,9 +562,8 @@ function deletepost (req, res, next) {
         } 
         //user_id, category_id, post_id, reply_id, operation, element, cb
         accesscontrol.checkAccess(currentuser, qobj.categoryid, -1, -1, 'delete', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
-            console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
-            if(accessGranted)
-            {
+            console.log("Can delete post: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted) {
                 let sqlquery = "DELETE FROM posts WHERE category_id=? AND post_id=?";
                 let myresult = "deleted";
                 db.run(sqlquery, [qobj.categoryid, qobj.postid]);
@@ -614,8 +571,7 @@ function deletepost (req, res, next) {
                 db.run(sqlquery, [qobj.categoryid, qobj.postid]);
                 res.send(myresult);
             }
-            else
-            {
+            else {
                 //add apropriate status
                 res.status(401);
                 res.send("Post: failed to delete");
@@ -639,14 +595,29 @@ function getpost (req, res, next) {
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
         // categoryid should be int only
 
-        let sqlquery = "SELECT * FROM posts WHERE category_id=? AND post_id=?";
-
-        db.get(sqlquery, [qobj.categoryid, qobj.postid], function(err, row) {
-            sqlquery = "SELECT * FROM replies WHERE category_id=? AND post_id=?";
-
-            db.all(sqlquery, [qobj.categoryid, qobj.postid], function(err, rows) {
-                res.send([row, rows]);
-            });
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, qobj.postid, -1, 'read', 'post', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can read post: ",accessGranted, "category id is: ",cat_id);
+            if(accessGranted) {
+                let sqlquery = "SELECT * FROM posts WHERE category_id=? AND post_id=?";
+                db.get(sqlquery, [qobj.categoryid, qobj.postid], function(err, row) {
+                    sqlquery = "SELECT * FROM replies WHERE category_id=? AND post_id=?";
+                    db.all(sqlquery, [qobj.categoryid, qobj.postid], function(err, rows) {
+                        res.send([row, rows]);
+                    });
+                });
+            }
+            else {
+                //add apropriate status
+                res.status(401);
+                res.send("Post: failed to read");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
+            }
         });
     }
     else {
@@ -663,17 +634,31 @@ function newreply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
-        let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content, user_id) VALUES(?, ?, ?, ?, ?)";
-        
-        let new_content = SqlString.escape(req.body.content);
-        let new_datetime = new Date(); 
-        new_datetime = SqlString.escape(new_datetime);
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, qobj.postid, -1, 'create', 'reply', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can create reply: ",accessGranted, "cat id is: ",cat_id);
+            if(accessGranted) {
+                let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content, user_id) VALUES(?, ?, ?, ?, ?)";
+                let new_content = SqlString.escape(req.body.content);
+                let new_datetime = new Date(); 
+                new_datetime = SqlString.escape(new_datetime);
+                let myresult = "inserted";
+                db.run(sqlquery, [qobj.categoryid, qobj.postid, new_datetime, new_content, req.user.id]);
+                res.send(myresult);
+            }
+            else {
+                //add apropriate status
+                res.status(401);
+                res.send("Reply: failed to read");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
 
-        let myresult = "inserted";
-
-        db.run(sqlquery, [qobj.categoryid, qobj.postid, new_datetime, new_content, req.user.id]);
-
-        res.send(myresult);
+            }
+        });
     }
     else {
         console.log("Undefined");
@@ -687,15 +672,29 @@ function editreply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
-        let sqlquery = "UPDATE replies SET content=? WHERE category_id=? AND post_id=? AND reply_id=?";
-        
-        let new_content = SqlString.escape(req.body.content);
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, qobj.postid, qobj.replyid, 'update', 'reply', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can update reply: ",accessGranted, "cat id is: ",cat_id);
+            if(accessGranted) {
+                let sqlquery = "UPDATE replies SET content=? WHERE category_id=? AND post_id=? AND reply_id=?";
+                let new_content = SqlString.escape(req.body.content);
+                let myresult = "edited";
+                db.run(sqlquery, [new_content, qobj.categoryid, qobj.postid, qobj.replyid]);
+                res.send(myresult);
+            }
+            else {
+                //add apropriate status
+                res.status(401);
+                res.send("Reply: failed to update");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
 
-        let myresult = "edited";
-
-        db.run(sqlquery, [new_content, qobj.categoryid, qobj.postid, qobj.replyid]);
-
-        res.send(myresult);
+            }
+        });
     }
     else {
         console.log("Undefined");
@@ -709,14 +708,31 @@ function deletereply (req, res, next) {
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
-        // console.log(qobj.categoryid, qobj.postid, qobj.replyid);
-        let sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=? AND reply_id=?";
 
-        let myresult = "deleted";
 
-        db.run(sqlquery, [qobj.categoryid, qobj.postid, qobj.replyid]);
 
-        res.send(myresult);
+        let currentuser = null;
+        if(req.isAuthenticated()) {
+            currentuser = req.user.id;
+        } 
+        //user_id, category_id, post_id, reply_id, operation, element, cb
+        accesscontrol.checkAccess(currentuser, qobj.categoryid, qobj.postid, qobj.replyid, 'delete', 'reply', db, function(usr_id, cat_id, oper, elm, accessGranted) {
+            console.log("Can delte reply: ",accessGranted, "cat id is: ",cat_id);
+            if(accessGranted) {
+                let sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=? AND reply_id=?";
+                let myresult = "deleted";
+                db.run(sqlquery, [qobj.categoryid, qobj.postid, qobj.replyid]);
+                res.send(myresult);
+            }
+            else {
+                //add apropriate status
+                res.status(401);
+                res.send("Reply: failed to delte");
+                next(); // is next the right thing to do ???
+                // the program breaks when the category doesn't exist eg. -1
+
+            }
+        });
     }
     else {
         console.log("Undefined");

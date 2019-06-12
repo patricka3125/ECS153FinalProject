@@ -12,17 +12,17 @@ ac.grant('user')
         .deleteOwn('reply')
         .createOwn('category')
     .grant('moderator')
-        //ONLY ONE MODERATOR PER CATEGORY!
         .extend('user')
-        .deleteOwn('category')
         .deleteAny('post')
         .deleteAny('reply')
+        .deleteOwn('category')                    // need to move to owner b/c only owner can delete
     .grant('owner')
         .extend('moderator')
         .updateOwn('category')
     .grant('admin')
         .extend('moderator')
         .deleteAny('category');
+ac.deny('admin').deleteAny('category');
 // ONLY THE OWNER OF A PPOST, REPLY OR CATEGORY CAN EDIT THEM!!!
 // MODERATORS CAN DELETE ANY POST, REPLY OR UPDATE OWN CATEGORY. 
 // ADMIN CAN DELETE ANY POST, REPLY OR CATEGORY
@@ -152,8 +152,8 @@ function hasAccess(operation, element, user_role, post_id, reply_id, category_ty
             if(user_role === 'member')
                 user_role = 'user';
             const permission = (user_role === 'owner')
-                   ? ac.can(user_role).deleteOwn('category') // if owner then delete own
-                   : ac.can(user_role).deleteAny('category'); // if not admin can delete any
+                   ? ac.can(user_role).deleteOwn('category')   // if owner then delete own
+                   : ac.can(user_role).deleteAny('category');    // if admin can delete any
             return permission.granted;
         }
         else { // element is either a post or a reply
