@@ -8,7 +8,7 @@ Our code is comprised of these parts:
 - Frontend in `/public`
 	- Forum: `index.html`, `script.js`
 	- Login/Signup: `login.html`, `signup.html`, `users_client.js` 
-- Backend in `app.js`, `accesscontrol.js`, `users.js`
+- Backend/Server in `app.js`, `accesscontrol.js`, `users.js`
 	- Forum Functionality
 		- CRUD for Categories, Posts, Replies, Settings
 	- Access Control
@@ -19,13 +19,15 @@ Our code is comprised of these parts:
 
 ## Security concepts from our project
 Web security concepts we explored:
-**`Authentication`, `Authoriation (Access Control)`, `Error Handling`, `Input Validation`, `Password Management`, `Session Management`, `SQL Injection`, `XSS`, `Brute Force/DDoS`, `CORS/SOP`**
+**`Authentication`, `Authorization (Access Control)`, `Error Handling`, `Input Validation`, `Password Management`, `Session Management`, `SQL Injection`, `XSS`, `Brute Force/DDoS`, `CORS/SOP`**
 
 ### Forum Functionality
-**Concepts: `Input Validation`, `Error Handling`, `CORS/SOP`, `Brute Force/DDoS`**  
-We implemented Create, Read, Update and Delete [HTTP methods](https://www.restapitutorial.com/lessons/httpmethods.html) for Categories, Posts, Replies and Settings. These requests are sent from the client in `script.js` and are handled by the server in `app.js`. The SOP is enforced by default as we do not allow cross-origin access. We have basic input validation (check if empty, check if boolean) for request queries and we pass the appropriate [HTTP status code](https://www.restapitutorial.com/httpstatuscodes.html) for invalid requests. 
+**Concepts: `Input Validation`, `Error Handling`, `CORS/SOP`, `Brute Force/DDoS`, `XSS`**  
+We implemented Create, Read, Update and Delete [HTTP methods](https://www.restapitutorial.com/lessons/httpmethods.html) for Categories, Posts, Replies and Settings. These requests are sent from the client in `script.js` and are handled by the server in `app.js`. The Same Origin Policy (SOP) is enforced by default as we do not allow cross-origin access. We have basic input validation (check if empty, check if boolean) for request queries and we pass the appropriate [HTTP status code](https://www.restapitutorial.com/httpstatuscodes.html) for invalid requests. 
 
 We used [`express-rate-limiter`](https://www.npmjs.com/package/express-rate-limit) to implement a basic rate limiter to protect against any DDoS or brute force attacks. The rate limiter blocks a client after too many repeated requests and applies to all requests (authentication/authorization, CRUD). 
+
+We address Cross-Site Scripting (XSS) in [several](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md) [ways](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.md). First, we safely populate the DOM by using safe javascript properties, like `textContent`. We also build our DOM through safe javascript functions like `document.createElement()`, `element.setAttribute()` and `element.appendChild()`. We avoid putting untrusted data into our HTML, as all of our data comes from our server. We use `JSON.parse()` instead of `eval()` to convert JSON, and we use the HTTPOnly cookie flag. These measures are just some of the many ways we can address/prevent XSS. In the future, using a modern frontend framework like ReactJS would be better for XSS prevention and for rendering our app. 
 
 
 ### Database
@@ -51,33 +53,44 @@ On the client side, we have a front-end interface for users to enter their usern
 
 ### Authorization
 **Concepts: `Authorization (Access Control)`, `Error Handling`, `Input Validation`**  
-For our project we implemented Hierarchical Role Based Access Control (HRBAC), along with Discretionary Resource Based Access Control. We used Role-Based AC to apply policies to groups (admin/user/guest) and used Discretionary Resource-Based AC to establish and change ownership/policies (owner/moderator/user) of resources (categories/posts/replies). 
+For our project we implemented Hierarchical Role Based Access Control (HRBAC), along with Discretionary Resource-Based Access Control (DRBAC). We used HRBAC to apply policies to groups (admin/user/guest) and used DRBAC to establish and change ownership/policies (owner/moderator/user) of resources (categories/posts/replies). 
 
 Through this sytem, users can create private categories, add other users to categories, admins have elevated privelges, authors can delete/edit their own content, and more. 
 
-In HRBAC, user roles extend each other. For example, guest can read public categories and user extends guest so user can read public categories as well. Moderator extends user, so a moderator can do everything both user and guest can do, and so on. This is why the first thing we set up inside `accesscontrol.js` is the HRBAC structure `"ac"`. 
-We used a library called [`accesscontrol`](https://www.npmjs.com/package/accesscontrol), which helps us set the user roles: 
+These are parameters/properties (roles, operations, resources) of the access control system we defined:
+- HRBAC Roles: `guest`, `user`, `admin`
+- DRBAC Roles: 
+    - For Categories: `owner`, `moderator`, `member`
+    - For Posts/Replies: `owner`
+- Operations: `create`, `read`, `update`, `delete`
+- Resources: `category`, `post`, `reply`
+
+In HRBAC, user roles extend each other. For example, guest can read public categories and user extends guest so user can read public categories as well. Moderator extends user, so a moderator can do everything both user and guest can do, and so on.  
+
+We set up our HRBAC structure inside `accesscontrol.js` using the [`accesscontrol`](https://www.npmjs.com/package/accesscontrol) package. We see through the code below that `moderator` inherits from `user` but can also perform additional operations:  
+
 `ac.grant('moderator')`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.extend('user')`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.deleteAny('post')`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.deleteAny('reply')`   
-It also provides a function that checks access based on user roles and the action each role can do over a spesific atribute:
+
+We can check access based on the user's role, the requested operation and the resource ownership:
 
 `const permission = (user_role === 'owner')`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`? ac.can(user_role).deleteOwn('category')`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`: ac.can(user_role).deleteAny('category');`   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return permission.granted;`   
 
-In this example `persmision.granted` will be true only if the user is owner so the user can delete any category that he created or if user role is admin then he can delete any category.   
+In the code above, permission is granted for the owner to delete any category they own.   
 
 **Access Control implementation steps**:  
-1. Check **user** against **users table**  
+1. Check **user** against **users table**.  
     In `checkAccess()`, we check if the user exists and if the user is an admin. If the user doesn't exist they are a guest. 
 2. Check **ownership/membership** against **resource**.  
     In `checkAccess()`, we call `checkOwnership()` which compares the user to the resource owner in the database, determines if the user can modify the resource. 
 3. Check **operation** against **role**.  
     In `checkAccess()`, if `checkOwnership()` is successful, we call `hasAccess()` to determine which operations the role can perform and which resources the role can view.  
-4. Error handling, input validation and granting access  
+4. Error handling, input validation and granting access.  
     If there are no errors and the input is valid, `checkAccess()` grants access for the requested operation. Otherwise, access is not granted.
     
 
@@ -87,3 +100,4 @@ In the future, we could explore:
 - [HTTPS](https://nodejs.org/api/https.html)
 - Additional [authentication strategies](http://www.passportjs.org/packages/)
 - Request-specific rate limiting
+- Use a frontend library like React
