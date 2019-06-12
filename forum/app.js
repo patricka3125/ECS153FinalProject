@@ -130,8 +130,8 @@ function testCheckAC()
             {
                 // checkAccess(user_id, category_id, post_id, reply_id, operation, element, cb)
                 accesscontrol.checkAccess(2, category_ids[i], 1, 5, operations[j], elements[k], db, function(usr_id, cat_id, oper, elm, accessGranted) {
-                     if(accessGranted)
-                        console.log(usr_id, cat_id, oper, elm, accessGranted);
+                     // if(accessGranted)
+                     //    console.log(usr_id, cat_id, oper, elm, accessGranted);
                 }); 
             }
         }
@@ -155,22 +155,13 @@ testCheckAC();
 
 // ============================================================================
 
-// let tempuserid = 2;
+
+// ===== Begin Category Handlers =====
 
 function newcategory (req, res, next) {
     // Create new category
     // /newcategory?categoryname=___&public=___
-// AccessControl(tempuserid, qobj.categoryname, function(canaccess){
-//    if (canaccess) {
-//    }
-//    else {
-//        res.send("permission denied");
-//        console.log("permission denied");
-//        next();
-//    }
-// });
 
-// TODO: add creator into owner role
     let qobj = req.query;
     if (qobj.categoryname != undefined && qobj.public != undefined) {
         // category name should be alpha only
@@ -195,9 +186,9 @@ function newcategory (req, res, next) {
                 db.run(sqlquery, [qobj.categoryname, qobj.public], function(err) {
 
                     // get the new category's id
-                    sqlquery = "SELECT category_id FROM categories WHERE title='" + qobj.categoryname +"'";
+                    sqlquery = "SELECT category_id FROM categories WHERE title=?";
 
-                    db.all(sqlquery, function(err, rows) {
+                    db.all(sqlquery, [qobj.categoryname],function(err, rows) {
                         newcategoryid = rows[0].category_id;
                         sqlquery = "INSERT INTO roles(user_id, category_id, role) VALUES(?, ?, ?)";
                         db.run(sqlquery, [req.user.id, newcategoryid, 1], function(err) { // 1=owner
@@ -220,10 +211,6 @@ function newcategory (req, res, next) {
     }
 }
 
-// accesscontrol.checkAccess(2, 13, -1, -1, 'delete', 'category', db, function(user_id,cat_id, oper, elm, accessGranted) {
-//     console.log("Test case is: ", accessGranted); 
-// });
-
 function deletecategory (req, res, next) {
     // Delete category:
     // /deletecategory?categoryid=___
@@ -240,15 +227,15 @@ function deletecategory (req, res, next) {
             console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
             if(accessGranted)
             {
-                let sqlquery = "DELETE FROM categories WHERE category_id=" + qobj.categoryid;
+                let sqlquery = "DELETE FROM categories WHERE category_id=?";
                 let myresult = "deleted";
-                db.run(sqlquery, function(err) {
-                    sqlquery = "DELETE FROM posts WHERE category_id=" + qobj.categoryid;
-                    db.run(sqlquery, function(err) {
-                        sqlquery = "DELETE FROM replies WHERE category_id=" + qobj.categoryid;
-                        db.run(sqlquery, function(err) {
-                            sqlquery = "DELETE FROM roles WHERE category_id=" + qobj.categoryid;
-                            db.run(sqlquery);
+                db.run(sqlquery, [qobj.categoryid], function(err) {
+                    sqlquery = "DELETE FROM posts WHERE category_id=?";
+                    db.run(sqlquery, [qobj.categoryid], function(err) {
+                        sqlquery = "DELETE FROM replies WHERE category_id=?";
+                        db.run(sqlquery, [qobj.categoryid], function(err) {
+                            sqlquery = "DELETE FROM roles WHERE category_id=?";
+                            db.run(sqlquery, [qobj.categoryid]);
                         });
                     });
                 });
@@ -274,10 +261,6 @@ function deletecategory (req, res, next) {
 function getcategorynames (req, res, next) {
     // Get categorynames:
     // /getcategorynames
-    // console.log(req.user);
-
-// TODO: if logged in -> get public + member ones
-//       if guest     -> get public only
     
     let sqlquery = "SELECT * FROM categories";
 
@@ -326,10 +309,6 @@ function getcategorynames (req, res, next) {
         });
     }
     
-
-    // db.all(sqlquery, function(err, rows) {
-    //     res.send(rows);
-    // });
 }
 
 function getcategoryposts (req, res, next) {
@@ -346,9 +325,9 @@ function getcategoryposts (req, res, next) {
         } 
         accesscontrol.checkAccess(currentuser, qobj.categoryid, null, null, "read", null, db, function(usr_id, cat_id, oper, elm, accessGranted) {
             if(accessGranted) {
-                let sqlquery = "SELECT * FROM posts WHERE category_id=" + qobj.categoryid;
+                let sqlquery = "SELECT * FROM posts WHERE category_id=?";
 
-                db.all(sqlquery, function(err, rows) {
+                db.all(sqlquery, [qobj.categoryid], function(err, rows) {
                     res.send(rows);  
                 });
             }
@@ -364,8 +343,10 @@ function getcategoryposts (req, res, next) {
     }
 }
 
+// ===== Begin Category Settings Handlers =====
+
 function updatevisibility(req, res, next) {
-    // update visibility
+    // update visibility of category
     // /updatevisibility?categoryid=___&visibility=___
     let qobj = req.query;
     if (qobj.categoryid != undefined && (qobj.visibility == 0 || qobj.visibility == 1)) {
@@ -397,7 +378,7 @@ function updatevisibility(req, res, next) {
 }
 
 function getcategoryusers(req, res, next) {
-    // get users
+    // get users of category
     // /getcategoryusers?categoryid=___
     let qobj = req.query;
     if (qobj.categoryid != undefined) {
@@ -410,9 +391,9 @@ function getcategoryusers(req, res, next) {
             if(accessGranted)
             {
                 // SELECT category_id, user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=4;
-                let sqlquery = " SELECT user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=" + qobj.categoryid;
+                let sqlquery = " SELECT user_id, roles.role, username FROM roles INNER JOIN users on users.id=roles.user_id WHERE category_id=?";
 
-                db.all(sqlquery, function(err, rows) {
+                db.all(sqlquery, [qobj.categoryid], function(err, rows) {
                     if(err) {
                         res.send("cannot view users");
                     }
@@ -435,6 +416,7 @@ function getcategoryusers(req, res, next) {
 }
 
 function updateuser (req, res, next) {
+    // update user role within category
     // "/updateuser?categoryid=" + categoryid + "&userid=" + userid + "&role=" + userrole;
     let qobj = req.query;
     if(qobj.categoryid != undefined && qobj.userid != undefined && qobj.role != undefined) {
@@ -467,6 +449,7 @@ function updateuser (req, res, next) {
 }
 
 function removeuser (req, res, next) {
+    // remove user from category
     // "/removeuser?categoryid=" + categoryid + "&userid=" + userid;
     let qobj = req.query;
     if(qobj.categoryid != undefined && qobj.userid != undefined) {
@@ -499,6 +482,7 @@ function removeuser (req, res, next) {
 }
 
 function adduser (req, res, next) {
+    // add user to category
     // "/adduser?categoryid=" + currentcategory + "&username=" + username + "&role=" + userrole;
     let qobj = req.query;
     if(qobj.categoryid != undefined && qobj.username != undefined && qobj.role != undefined) {
@@ -542,6 +526,9 @@ function adduser (req, res, next) {
     }
 }
 
+
+// ===== Begin Post Handlers =====
+
 function newpost (req, res, next) {
     // Create new post
     // /newpost?categoryid=___                            [title, content]
@@ -570,12 +557,9 @@ function newpost (req, res, next) {
             }
             else
             {
-                //add apropriate status
-                //res.status(401);
+                res.status(401);
                 res.send("Post: failed to create");
-                next(); // is next the right thing to do ???
-                // the program breaks when the category doesn't exist eg. -1
-
+                next();
             }
         });
     }
@@ -585,7 +569,7 @@ function newpost (req, res, next) {
     }
 }
 
-function editpost (req, res, next) { // ################################fix string
+function editpost (req, res, next) { 
     // Edit post:
     // /editpost?categoryid=___&postid=___                [title, content]
 
@@ -623,17 +607,17 @@ function deletepost (req, res, next) {
             console.log("Can delete: ",accessGranted, "category id is: ",cat_id);
             if(accessGranted)
             {
-                let sqlquery = "DELETE FROM posts WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
+                let sqlquery = "DELETE FROM posts WHERE category_id=? AND post_id=?";
                 let myresult = "deleted";
-                db.run(sqlquery);
-                sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid;
-                db.run(sqlquery);
+                db.run(sqlquery, [qobj.categoryid, qobj.postid]);
+                sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=?";
+                db.run(sqlquery, [qobj.categoryid, qobj.postid]);
                 res.send(myresult);
             }
             else
             {
                 //add apropriate status
-                //res.status(401);
+                res.status(401);
                 res.send("Post: failed to delete");
                 next(); // is next the right thing to do ???
                 // the program breaks when the category doesn't exist eg. -1
@@ -647,13 +631,9 @@ function deletepost (req, res, next) {
     }
 }
 
-function getpost (req, res, next) { // ################################fix string
+function getpost (req, res, next) { 
     // Get post (and replies)
     // /getpost?categoryid=___&postid=___
-    
-    // console.log("Get post req user: ", req.user);
-    // console.log("Authenticated? ", req.isAuthenticated());
-
 
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
@@ -675,6 +655,8 @@ function getpost (req, res, next) { // ################################fix strin
     }
 }
 
+// ===== Begin Reply Handlers =====
+
 function newreply (req, res, next) {
     // Create new reply
     // /newreply?categoryid=___&postid=___                [content]
@@ -683,7 +665,6 @@ function newreply (req, res, next) {
     if (qobj.categoryid != undefined && qobj.postid != undefined) {
         let sqlquery = "INSERT INTO replies(category_id, post_id, date_created, content, user_id) VALUES(?, ?, ?, ?, ?)";
         
-        // let new_title = SqlString.escape(req.body.title);
         let new_content = SqlString.escape(req.body.content);
         let new_datetime = new Date(); 
         new_datetime = SqlString.escape(new_datetime);
@@ -700,7 +681,7 @@ function newreply (req, res, next) {
     }
 }
 
-function editreply (req, res, next) { // ################################fix string
+function editreply (req, res, next) { 
     // Edit reply:
     // /editreply?categoryid=___&postid=___&replyid=___   [content]
 
@@ -729,11 +710,11 @@ function deletereply (req, res, next) {
     let qobj = req.query;
     if (qobj.categoryid != undefined && qobj.postid != undefined && qobj.replyid != undefined) {
         // console.log(qobj.categoryid, qobj.postid, qobj.replyid);
-        let sqlquery = "DELETE FROM replies WHERE category_id="+qobj.categoryid+" AND post_id="+qobj.postid+" AND reply_id="+qobj.replyid;
+        let sqlquery = "DELETE FROM replies WHERE category_id=? AND post_id=? AND reply_id=?";
 
         let myresult = "deleted";
 
-        db.run(sqlquery);
+        db.run(sqlquery, [qobj.categoryid, qobj.postid, qobj.replyid]);
 
         res.send(myresult);
     }
@@ -743,10 +724,12 @@ function deletereply (req, res, next) {
     }
 }
 
-function getuserroles(userid, cb) {
-    let sqlquery = "SELECT * FROM roles WHERE user_id=" + userid;
+// ===== Begin User Role Helpers =====
 
-    db.all(sqlquery, function(err, rows) {
+function getuserroles(userid, cb) {
+    let sqlquery = "SELECT * FROM roles WHERE user_id=?";
+
+    db.all(sqlquery, [userid], function(err, rows) {
         cb(err, rows);
     });
 }
@@ -772,13 +755,9 @@ function parse_userrolestable(roles_rows) {
 }
 
 function getuserprofile (req, res, next) {
-    // could be handled by the session cookie, but don't. 
-    // need to check if user is able to get info on userid
-    // getuserprofile
+    // send user-assosciated data to client
     // id, username, role, [owned_categories], [moderator_categories], [user_categories]
 
-    // let qobj = req.query;
-    // console.log(req.user);
     if (req.isAuthenticated()) {
 
         users.find_userid(req.user.id, db, function(err, row) {
@@ -818,8 +797,6 @@ function getuserprofile (req, res, next) {
         res.status(401);
         res.send("");
         console.log("Not logged in");
-        // return;
-        // return next();
     }
 
 }
@@ -869,6 +846,8 @@ function gettable( req, res, next) {
     }
 }
 
+// ===== Begin Login/Signup Handlers =====
+
 function create_user(req,res,next) {
     let qobj = req.query;
     let username = req.body.username;
@@ -906,44 +885,43 @@ function fileNotFound(req, res) {
     }
 
 // server router
+
 app.use(limiter); // apply to all requests
 app.use(express.static('public'));  // can I find a static file? 
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// app.use(flash());
-
-// app.get('/getposts', getpostsHandler);
-// app.post('/newpost', newpostHandler);
-// app.get('/clearposts', clearpostsHandler);
-
+// category methods
 app.get('/newcategory', newcategory);
 app.get('/deletecategory', deletecategory);
 app.get('/getcategorynames', getcategorynames);
 app.get('/getcategoryposts', getcategoryposts);
-app.get('/updatevisibility', updatevisibility);
 
+// category settings methods
+app.get('/updatevisibility', updatevisibility);
 app.get('/getcategoryusers', getcategoryusers);
 app.get('/updateuser', updateuser);
 app.get('/removeuser', removeuser);
 app.get('/adduser', adduser);
 
+// post methods
 app.post('/newpost', newpost);
 app.post('/editpost', editpost);
 app.get('/deletepost', deletepost);
 app.get('/getpost', getpost);
 
+// reply methods
 app.post('/newreply', newreply);
 app.post('/editreply', editreply);
 app.get('/deletereply', deletereply);
 
+// user helper methods
 app.get('/getuserprofile', getuserprofile);
 app.get('/getauthor', getauthor);
 
+// authentication methods
 app.post('/create_user', create_user);
-// TODO: sucessRedirect to user profile, failureRedirect to login page
-
 app.get('/login', function(req, res) {
     res.sendFile(path.join(__dirname + '/public/login.html')); 
 });
@@ -961,9 +939,6 @@ app.get('/loginsuccess', function(req, res) {
 app.post('/login', passport.authenticate('local', { successRedirect: '/loginsuccess',
                                                     failureRedirect: '/loginfailure',
                                                     failureFlash: false })//,
-    // function(req, res) {
-    //     res.redirect()
-    // }
 );
 app.get('/logout', function(req, res) {
     req.logout();
@@ -972,25 +947,6 @@ app.get('/logout', function(req, res) {
 
 app.get('/gettable', gettable);
 
-/* SERVER 
-
-Create new category:    GET  /newcategory?categoryname=___&public=___
-Delete category:        GET  /deletecategory?categoryid=___
-Get categorynames:      GET  /getcategorynames
-    
-Get categoryposts:      GET  /getcategoryposts?categoryid=___
-
-Create new post:        POST /newpost?categoryid=___                            [title, content]
-Edit post:              POST /editpost?categoryid=___&postid=___                [title, content]
-Delete post:            GET  /deletepost?categoryid=___&postid=___
-Get post (and replies): GET  /getpost?categoryid=___&postid=___
-
-Create new reply:       POST /newreply?categoryid=___&postid=___                [content]
-Edit reply:             POST /editreply?categoryid=___&postid=___&replyid=___   [content]
-Delete reply:           GET  /deletereply?categoryid=___&postid=___&replyid=___
-
-*/
-
 app.use( fileNotFound ); 
 
 const server = app.listen(process.env.PORT || port, () => {
@@ -998,50 +954,3 @@ const server = app.listen(process.env.PORT || port, () => {
 });
 
 module.exports = app;
-
-
-/*
-function checkAccess(user_id, category_id)
-{
-    users.find_userid(user_id, db, function(err, row) {
-        console.log(row);
-        if(row == null)
-        {
-            user_role = 'guest';
-            //function hasAccess(operation, element, user_role, type)
-            //hasAccess(operation, element, user_role, 1)
-        }
-        else if (row.role === 1)
-            user_role = 'admin';
-
-        else // if user is not guest or admin, get role from roles
-        {
-             getSingleRole(user_id, category_id, function(roles_err, roles_row) {
-                if(roles_err)
-                    console.log("finding roles error");
-                else
-                {
-                    if(roles_row == null)
-                        user_role = 'user';
-                    else if (roles_row.role == 1)
-                        user_role = 'member';
-                    else if (roles_row.role == 2)
-                        user_role = 'moderator'
-                    console.log(roles_row);
-                }
-                //AC func
-            });
-        }
-    });
-    //function getuserroles(userid, cb)
-    // check if user is admin, if it is retrun admin
-    // if not check it is a moderator, or member(user) of a private function
-
-    //DONE if user_id not in usr database, return guest
-    //DONE if user_id in usr data base and is admin, return admin
-    //if user_id in usr data base but not in category database, return user
-    //if user_id in both usr and category databasem return memeber
-    //      a memebr has the same privs. as user inside the private 
-    //if user_id inside category and is a moderator, return moderator
-}
-*/

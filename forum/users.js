@@ -18,10 +18,9 @@ exports.add_user = function(username,password,db,cb) {
 exports.find_user = function(username,db,cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
-    // TODO: vulnerable to SQL injection
-    let sqlquery = "SELECT * FROM users WHERE username='" + username + "'";
+    let sqlquery = "SELECT * FROM users WHERE username=?";
     // console.log(username);
-    db.all(sqlquery, function(err, rows) {
+    db.all(sqlquery, [username], function(err, rows) {
         if(err) { cb(err,null); }
         else if(rows.length < 1) {
             cb(null,null);
@@ -34,10 +33,9 @@ exports.find_user = function(username,db,cb) {
 exports.find_userid = function(userid,db,cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
-    // TODO: vulnerable to SQL injection
-    let sqlquery = "SELECT id, username, role FROM users WHERE id=" + userid;
+    let sqlquery = "SELECT id, username, role FROM users WHERE id=?";
 
-    db.all(sqlquery, function(err, rows) {
+    db.all(sqlquery, [userid],function(err, rows) {
         if(err) { cb(err,null); }
         else if(rows.length < 1) {
             cb(null,null);
@@ -47,32 +45,12 @@ exports.find_userid = function(userid,db,cb) {
     });
 }
 
-// problem: need to use callback, because returns asynchronously -> always returns true
-// exports.valid_password = function(username,password,db) {
-//     if(!db) { cb(new Error('DB does not exist')); }
-
-//     let sqlquery = "SELECT * FROM users WHERE username='" + username
-//                    + "' AND password='" + password + "'";
-
-//     var is_valid = true;
-
-//     db.all(sqlquery, function(err, rows) {
-//         if(err) { is_valid = false; }
-//         if(rows.length < 1) { is_valid = false; }
-//     });
-
-//     return is_valid;
-// }
-
 exports.validate_userpass = function(username,password,db, cb) {
     if(!db) { cb(new Error('DB does not exist')); }
 
-    let sqlquery = "SELECT * FROM users WHERE username='" + username + "'";// AND password='" + password + "'";
+    let sqlquery = "SELECT * FROM users WHERE username=?";
 
-    
-
-
-    db.all(sqlquery, function(err, rows) {
+    db.all(sqlquery, [username],function(err, rows) {
         if(err) { 
             cb(err, null);
         }
