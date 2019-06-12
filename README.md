@@ -32,7 +32,12 @@ We address Cross-Site Scripting (XSS) in [several](https://github.com/OWASP/Chea
 
 ### Database
 **Concepts: `SQL Injection`**  
-We used a [`sqlite3`](https://www.npmjs.com/package/sqlite3) database for portability. We prevent SQL injection by sanitizing input with the [`sqlstring`](https://www.npmjs.com/package/sqlstring) package and through [prepared statements](https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback).
+We used a [`sqlite3`](https://www.npmjs.com/package/sqlite3) database for portability. We prevent SQL injection by sanitizing input with the [`sqlstring`](https://www.npmjs.com/package/sqlstring) package and through [prepared statements](https://github.com/mapbox/node-sqlite3/wiki/API#databaserunsql-param--callback). Our relational database consists of the following tables/columns and an example can be seen in `database structure.xlsx`.  
+- **users**: `user_id`, `username`, `password` (hashed), `role` (1=admin, 0=user)
+- **categories**: `category_id`, `title`, `public` (1=public, 0=private)
+- **posts**: `category_id`, `post_id`, `user_id`, `date_created`, `title`, `content`
+- **replies**: `category_id`, `post_id`, `reply_id`, `user_id`, `date_created`, `content`
+- **roles**: `category_id`, `user_id`, `role` (1=owner, 2=moderator, 3=user)
 
 
 ### Authentication
@@ -87,7 +92,7 @@ In the code above, permission is granted for the owner to delete any category th
 1. Check **user** against **users table**.  
     In `checkAccess()`, we check if the user exists and if the user is an admin. If the user doesn't exist they are a guest. 
 2. Check **ownership/membership** against **resource**.  
-    In `checkAccess()`, we call `checkOwnership()` which compares the user to the resource owner in the database, determines if the user can modify the resource. 
+    In `checkAccess()`, we call `checkOwnership()` which compares the user to the resource owner in the database and determines if the user can modify the resource. 
 3. Check **operation** against **role**.  
     In `checkAccess()`, if `checkOwnership()` is successful, we call `hasAccess()` to determine which operations the role can perform and which resources the role can view.  
 4. Error handling, input validation and granting access.  
