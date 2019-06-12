@@ -23,7 +23,7 @@ Web security concepts we explored:
 
 ### Forum Functionality
 **Concepts: `Input Validation`, `Error Handling`, `CORS/SOP`, `Brute Force/DDoS`, `XSS`**  
-We implemented Create, Read, Update and Delete [HTTP methods](https://www.restapitutorial.com/lessons/httpmethods.html) for Categories, Posts, Replies and Settings. These requests are sent from the client in `script.js` and are handled by the server in `app.js`. The Same Origin Policy (SOP) is enforced by default as we do not allow cross-origin access. We have basic input validation (check if empty, check if boolean) for request queries and we pass the appropriate [HTTP status code](https://www.restapitutorial.com/httpstatuscodes.html) for invalid requests. 
+We implemented Create, Read, Update and Delete [HTTP methods](https://www.restapitutorial.com/lessons/httpmethods.html) for Categories, Posts, Replies and Settings. These requests are sent from the client in `script.js` and are handled by the server in `app.js`. We have basic input validation (check if empty, check if boolean) for request queries and we pass the appropriate [HTTP status code](https://www.restapitutorial.com/httpstatuscodes.html) for invalid requests. The Same Origin Policy (SOP) is enforced by default as we do not allow cross-origin access. 
 
 We used [`express-rate-limiter`](https://www.npmjs.com/package/express-rate-limit) to implement a basic rate limiter to protect against any DDoS or brute force attacks. The rate limiter blocks a client after too many repeated requests and applies to all requests (authentication/authorization, CRUD). 
 
@@ -43,15 +43,15 @@ We used a [`sqlite3`](https://www.npmjs.com/package/sqlite3) database for portab
 ### Authentication
 **Concepts: `Authentication`, `Password Management`,`Input Validation`, `Session Management`, `XSS`**  
 #### Server Side
-Server side authentication code is in the ```app.js``` file. Our forum app supports login, signup, and logout.
+Server side authentication code is in the `app.js` file. Our forum app supports login, signup, and logout.
 
-For sign up, there is a handler that is triggered when the user makes a POST request for ```/signup```. This will trigger the ```create_user``` function, which will take the username and password in the request query's parameters and send a SQL query to the database. The password is hashed with [`bcrypt`](https://www.npmjs.com/package/bcrypt) so that passwords can't be read even with access to the database. If there are no errors, a new entry will be added to the users table.
+For sign up, there is a handler that is triggered when the user makes a POST request for `/signup`. This will trigger the `create_user` function, which will take the username and password in the request query's parameters and send a SQL query to the database. The password is hashed with [`bcrypt`](https://www.npmjs.com/package/bcrypt) in the `add_user` function so that passwords can't be read even with access to the database. If there are no errors, a new entry will be added to the users table.
 
 We used the [`passport.js`](http://www.passportjs.org/) middleware to help with handling some authentication logic. Passport.js allows for many different strategies for user login and signup. For our forum app, we used the "basic strategy", which is username and password matching for login. 
 
-In our code, we wrote the function handler that queries the database to check the username and password. The password is checked using [`bcrypt`](https://www.npmjs.com/package/bcrypt) and if it matches, the passport and session middleware will create a persistent login session and cookie.
+In our code, we wrote the function handler that queries the database to check the username and password. The password is checked using [`bcrypt`](https://www.npmjs.com/package/bcrypt) in the `validate_userpass` function and if it matches, the passport and session middleware will create a persistent login session and cookie.
 
-We used [`express-session`](https://www.npmjs.com/package/express-session) to handle server-side sessions and manage cookies. We provide the passport middleware with the user id, so that it can serialize the user id and include the result inside the cookie. This cookie is given to the client so that subsequent requests can be deserialized and verified using the cookie instead of username/password matching. We implemented as many [best practices for cookie security](https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely) as we could for our local/dev environment, which helps protect against XSS attacks (httpOnly, maxAge). Other cookie options can be enabled in a non-local environment (secure HTTPS, domain/path). 
+We used [`express-session`](https://www.npmjs.com/package/express-session) to handle server-side sessions and manage cookies. We provide the passport middleware with the user id, so that it can serialize the user id in the `passport.serializeUser` function and include the result inside the cookie. This cookie is given to the client so that subsequent requests can be deserialized in the `passport.deserializeUser` function and verified using the cookie instead of username/password matching. We implemented as many [best practices for cookie security](https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely) as we could for our local/dev environment, which helps protect against XSS attacks (httpOnly, maxAge). Other cookie options can be enabled in a non-local environment (secure HTTPS, domain/path). 
 
 #### Client Side
 On the client side, we have a front-end interface for users to enter their username and password information, located in ```login.html``` and ```signup.html``` respectively. Requests are sent in ```users_client.js``` , and we have client-side input validation and error messages when invalid credentials are used (in addition to server-side). 
@@ -73,19 +73,20 @@ These are parameters/properties (roles, operations, resources) of the access con
 In HRBAC, user roles extend each other. For example, guest can read public categories and user extends guest so user can read public categories as well. Moderator extends user, so a moderator can do everything both user and guest can do, and so on.  
 
 We set up our HRBAC structure inside `accesscontrol.js` using the [`accesscontrol`](https://www.npmjs.com/package/accesscontrol) package. We see through the code below that `moderator` inherits from `user` but can also perform additional operations:  
-
-`ac.grant('moderator')`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.extend('user')`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.deleteAny('post')`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.deleteAny('reply')`   
+```
+ac.grant('moderator')   
+    .extend('user')   
+    .deleteAny('post')
+    .deleteAny('reply')
+```
 
 We can check access based on the user's role, the requested operation and the resource ownership:
-
-`const permission = (user_role === 'owner')`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`? ac.can(user_role).deleteOwn('category')`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`: ac.can(user_role).deleteAny('category');`   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return permission.granted;`   
-
+```
+const permission = (user_role === 'owner')
+    ? ac.can(user_role).deleteOwn('category')
+    : ac.can(user_role).deleteAny('category');
+    return permission.granted;
+```
 In the code above, permission is granted for the owner to delete any category they own.   
 
 **Access Control implementation steps**:  
