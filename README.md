@@ -15,7 +15,13 @@ Our code is comprised of these parts:
 	    - Authentication
 		    - Sessions, login/logout
 		- Authorization
-		    - Check priviliges of user, eg. can: read, write, edit 
+		    - Check priviliges of user, eg. can: read, write, edit   
+
+In `/forum`, install dependencies with `npm install` and start the server with `npm start`
+
+View the website at: http://localhost:8080
+
+The final slides are in the repository as a PDF and also as a [google slides link here](https://docs.google.com/presentation/d/1EIq6Ames-ACeVBKtbtLMI06MytMK6hZf8Owf1b6IjFg/edit?usp=sharing).
 
 ## Security concepts from our project
 Web security concepts we explored:
